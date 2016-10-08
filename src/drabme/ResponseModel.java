@@ -170,41 +170,41 @@ public class ResponseModel {
 		return value ;
 	}
 	
-	public boolean isPairSynergistic (Drug[] combination) throws IOException
-	{
-		boolean value = false ;
-	
-		if (combination.length != 2)
-		{
-			Logger.output(1, "ERROR: ResponseModel.isPairSynergistic invoked without a proper pair referenced!") ;
-			return false ;
-		}
-		// BUG AAF
-		// THIS ALGORITHM ONLY (CURRENTLY) WORKS FOR PAIRS - NOT TRIPLETS ETC
-		PerturbationModel combinationresponse = perturbationModels.get(getIndexOfPerturbationModel(combination)) ;
-		PerturbationModel single1response = perturbationModels.get(getIndexOfPerturbationModel(new Drug[]{combination[0]})) ;
-		PerturbationModel single2response = perturbationModels.get(getIndexOfPerturbationModel(new Drug[]{combination[1]})) ;
-		
-		if (combinationresponse.hasGlobalOutput() && single1response.hasGlobalOutput() && single2response.hasGlobalOutput())
-		{
-			
-			if (combinationresponse.getGlobalOutput() < min(single1response.getGlobalOutput(), single2response.getGlobalOutput()))
-			{
-				Logger.output (2, combination[0].getName() + " + " + combination[1].getName() + " is synergistic");
-				perturbations.addSynergyObservation(combination);
-				value = true ;
-			}
-			else
-			{
-				Logger.output (2, combination[0].getName() + " + " + combination[1].getName() + " is NOT synergistic");
-				
-				perturbations.addNonSynergyObservation(combination);
-				value = false ;
-			}
-		}
-		
-		return value ;
-	}
+//	public boolean isPairSynergistic (Drug[] combination) throws IOException
+//	{
+//		boolean value = false ;
+//	
+//		if (combination.length != 2)
+//		{
+//			Logger.output(1, "ERROR: ResponseModel.isPairSynergistic invoked without a proper pair referenced!") ;
+//			return false ;
+//		}
+//		// BUG AAF
+//		// THIS ALGORITHM ONLY (CURRENTLY) WORKS FOR PAIRS - NOT TRIPLETS ETC
+//		PerturbationModel combinationresponse = perturbationModels.get(getIndexOfPerturbationModel(combination)) ;
+//		PerturbationModel single1response = perturbationModels.get(getIndexOfPerturbationModel(new Drug[]{combination[0]})) ;
+//		PerturbationModel single2response = perturbationModels.get(getIndexOfPerturbationModel(new Drug[]{combination[1]})) ;
+//		
+//		if (combinationresponse.hasGlobalOutput() && single1response.hasGlobalOutput() && single2response.hasGlobalOutput())
+//		{
+//			
+//			if (combinationresponse.getGlobalOutput() < min(single1response.getGlobalOutput(), single2response.getGlobalOutput()))
+//			{
+//				Logger.output (2, combination[0].getName() + " + " + combination[1].getName() + " is synergistic");
+//				perturbations.addSynergyObservation(combination);
+//				value = true ;
+//			}
+//			else
+//			{
+//				Logger.output (2, combination[0].getName() + " + " + combination[1].getName() + " is NOT synergistic");
+//				
+//				perturbations.addNonSynergyObservation(combination);
+//				value = false ;
+//			}
+//		}
+//		
+//		return value ;
+//	}
 	
 	private int getIndexOfPerturbationModel(Drug[] drugs)
 	{

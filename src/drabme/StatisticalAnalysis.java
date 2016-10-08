@@ -27,10 +27,10 @@ public class StatisticalAnalysis {
 		return new SpearmansCorrelation().correlation(perturbationPanel.getObservedCombinationResponses(combinationsize), perturbationPanel.getPredictedAverageCombinationResponses(combinationsize)) ;
 	}
 	
-	public double getSpearmansCorrelationSignificance (int combinationsize)
-	{
-		
-	}
+//	public double getSpearmansCorrelationSignificance (int combinationsize)
+//	{
+//		
+//	}
 
 	public double getPearsonCorrelation (int combinationsize)
 	{
@@ -42,25 +42,25 @@ public class StatisticalAnalysis {
 		return new KendallsCorrelation().correlation(perturbationPanel.getObservedCombinationResponses(combinationsize), perturbationPanel.getPredictedAverageCombinationResponses(combinationsize)) ;
 	}
 	
-	public double getSensitivity (int combinationsize)
-	{
-		
-	}
-	
-	public double getSpecificity (int combinationsize)
-	{
-		
-	}
-	
-	public double getPositivePredictiveValue (int combinationsize)
-	{
-		
-	}
-	
-	public double getNegativePredictiveValue (int combinationsize)
-	{
-		
-	}
+//	public double getSensitivity (int combinationsize)
+//	{
+//		
+//	}
+//	
+//	public double getSpecificity (int combinationsize)
+//	{
+//		
+//	}
+//	
+//	public double getPositivePredictiveValue (int combinationsize)
+//	{
+//		
+//	}
+//	
+//	public double getNegativePredictiveValue (int combinationsize)
+//	{
+//		
+//	}
 	
 	public double getSynergyClassificationAccuracy (int combinationsize)
 	{
