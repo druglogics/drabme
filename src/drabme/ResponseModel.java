@@ -11,9 +11,14 @@ import java.util.HashSet;
 
 import gitsbe.BooleanModel;
 
-/*
- * Similar to the BooleanModel in Gitsbe, but adds output weights, and drugs with their computed effects.  
+/**
+ * Each ResponseModel is based on a single BooleanModel instance, and splits the
+ * original model to a collection of PerturbationModel, where each
+ * PerturbationModel is the specific instance of models with perturbations
+ * specified in the PerturbationPanel instance
  * 
+ * @author asmund
+ *
  */
 
 public class ResponseModel {
@@ -29,10 +34,6 @@ public class ResponseModel {
 	private ArrayList<PerturbationModel> perturbationModels;
 
 	private ModelOutputs modelOutputs;
-
-	// public ResponseModel() {
-	//
-	// }
 
 	public ResponseModel(BooleanModel booleanModel, ModelOutputs modelOutputs,
 			PerturbationPanel perturbationPanel) {

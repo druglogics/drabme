@@ -393,16 +393,6 @@ public class Drabme implements Runnable {
 					"Classification accuracy: "
 							+ sa.getSynergyClassificationAccuracy(combinationsize));
 		}
-		// Logger.output(2, perturbation.getName() + "\t" + average + "\t" + sd
-		// + "\t" + responseString);
-
-		// PerformanceAssessment pa = new PerformanceAssessment (drugs,
-		// drugData) ;
-		//
-		// Logger.output(1, "Classification accuracy: " + pa.getAccuracy());
-		//
-		// Logger.output(1, "Spearman correlation: " +
-		// pa.getSpearmanCorrelation()) ;
 
 		// -------
 		// The end

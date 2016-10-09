@@ -23,6 +23,14 @@ public class Drug {
 		targets = new ArrayList<String>();
 	}
 
+	/**
+	 * 
+	 * @param effect
+	 *            to describe if drug is activating or inhibiting it's target
+	 *            (most drugs are inhibitors, but some can be modelled as
+	 *            activators, i.e. drugs inducing DNA damage that activates
+	 *            TP53)
+	 */
 	public void addEffect(boolean effect) {
 		String effector = "";
 		if (effect == true)
@@ -75,7 +83,7 @@ public class Drug {
 
 	/**
 	 * 
-	 * @return arraylist of all drug targets
+	 * @return ArrayList of all drug targets
 	 */
 	public ArrayList<String> getTargets() {
 		return targets;

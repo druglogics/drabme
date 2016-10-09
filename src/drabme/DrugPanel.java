@@ -145,12 +145,6 @@ public class DrugPanel {
 					Arrays.copyOfRange(lines.get(i).split("\t"), 2, lines
 							.get(i).split("\t").length));
 
-			// new ArrayList(lines.get(i).split("\t")).subList(2,
-			// lines.get(i).split("\t").length).toArray(new String[0]) ;
-			// Arrays.copyOfRange(lines.get(i).split("\t"), 2,
-			// lines.get(i).split("\t").length)
-			// drugs.get(i).addTargets(lines.get(i).substring(lines.get(i).indexOf('\t')
-			// + 1).split("\t"));
 		}
 	}
 
@@ -304,10 +298,15 @@ public class DrugPanel {
 
 	}
 
+	/**
+	 * 
+	 * @param combination
+	 *            of size k that will be split to subsets of size k-1
+	 * @return
+	 */
 	public static Drug[][] getCombinationSubsets(Drug[] combination) {
 		ArrayList<Drug[]> subsets = new ArrayList<Drug[]>();
-		// Drug[] subsets ;
-
+		
 		int drugsInCombination = combination.length;
 		int drugsInSubset = drugsInCombination - 1;
 
@@ -341,6 +340,13 @@ public class DrugPanel {
 
 	}
 
+	/**
+	 * 
+	 * @param drugs
+	 *            in drugset for which unique id will be generated. Hash will be
+	 *            name-based, so each drug must have unique name
+	 * @return hash
+	 */
 	public static int getDrugSetHash(Drug[] drugs) {
 		int hash = 0;
 

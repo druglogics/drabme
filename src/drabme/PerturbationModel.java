@@ -12,6 +12,12 @@ import gitsbe.BooleanEquation;
 import gitsbe.BooleanModel;
 import gitsbe.Logger;
 
+/**
+ * Similar to the BooleanModel in Gitsbe, but adds output weights, and drugs with their computed effects.  
+ * 
+ * @author asmund
+ *
+ */
 public class PerturbationModel extends BooleanModel {
 
 	private Perturbation perturbation;
