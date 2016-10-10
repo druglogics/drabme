@@ -2,12 +2,8 @@ package drabme;
 
 import gitsbe.Logger;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 
 import gitsbe.BooleanModel;
 
