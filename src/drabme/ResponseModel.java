@@ -64,8 +64,7 @@ public class ResponseModel {
 									// results file to structure results
 
 			// Calculate stable state(s), then determine global output
-			perturbationModels.get(i).calculateStableStatesVC(
-					"/home/asmund/Dokumenter/Cycret/Drabme/bnet/");
+			perturbationModels.get(i).calculateStableStatesVC( "./output");
 			perturbationModels.get(i).calculateGlobalOutput();
 
 			// Store response for perturbation set

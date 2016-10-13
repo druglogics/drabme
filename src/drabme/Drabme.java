@@ -14,7 +14,7 @@ import java.util.Calendar;
 
 /* Drabme - Drug Response Analysis of Boolean Models from Evolution
  * 
- * Copyright Åsmund Flobak 2014-2015
+ * Copyright Asmund Flobak 2014-2015
  * 
  * email: asmund.flobak@ntnu.no
  * 
@@ -34,17 +34,18 @@ public class Drabme implements Runnable {
 	private int verbosity;
 
 	// inputs
+	private String modelDirectory;
+
 	private String filenameDrugs;
 	private String filenameCombinations;
 	private String filenameModelOutputs;
-	private String filenameBooleanModels;
 	private String filenameOutput;
 	private String filenameSummary;
 	private String filenameDrugResponseObservations;
 
 	private int combosize;
 
-	public Drabme(int verbosity, String filenameBooleanModels,
+	public Drabme(int verbosity, String modelDirectory,
 			String filenameDrugs, String filenameCombinations,
 			String filenameModelOutputs, String filenameOutput,
 			String filenameSummary, int combosize) {
@@ -52,7 +53,7 @@ public class Drabme implements Runnable {
 		// Set variables
 		this.filenameDrugs = filenameDrugs;
 		this.filenameModelOutputs = filenameModelOutputs;
-		this.filenameBooleanModels = filenameBooleanModels;
+		this.modelDirectory = modelDirectory;
 		this.filenameOutput = filenameOutput;
 		this.filenameSummary = filenameSummary;
 		this.combosize = combosize;
@@ -63,7 +64,7 @@ public class Drabme implements Runnable {
 
 	}
 
-	public Drabme(int verbosity, String filenameBooleanModels,
+	public Drabme(int verbosity, String modelDirectory,
 			String filenameDrugs, String filenameCombinations,
 			String filenameDrugResponseObservations,
 			String filenameModelOutputs, String filenameOutput,
@@ -72,7 +73,7 @@ public class Drabme implements Runnable {
 		// Set variables
 		this.filenameDrugs = filenameDrugs;
 		this.filenameModelOutputs = filenameModelOutputs;
-		this.filenameBooleanModels = filenameBooleanModels;
+		this.modelDirectory = modelDirectory;
 		this.filenameOutput = filenameOutput;
 		this.filenameSummary = filenameSummary;
 		this.combosize = combosize;
@@ -109,7 +110,7 @@ public class Drabme implements Runnable {
 		// Clean tmp directory
 		// -------------------
 		cleanTmpDirectory(new File(
-				"/home/asmund/Dokumenter/Cycret/Drabme/bnet/tmp"));
+				"./tmp"));
 		Logger.output(2, "Cleaning tmp directory...");
 
 		// ---------------
@@ -120,7 +121,8 @@ public class Drabme implements Runnable {
 		ArrayList<BooleanModel> booleanModels = new ArrayList<BooleanModel>();
 
 		try {
-			this.loadBooleanModels(filenameBooleanModels, "", booleanModels);
+			//this.loadBooleanModels(filenameBooleanModels, "", booleanModels);
+			this.loadBooleanModels(modelDirectory, booleanModels);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -421,34 +423,21 @@ public class Drabme implements Runnable {
 		}
 	}
 
-	private void loadBooleanModels(String filename, String directory,
-			ArrayList<BooleanModel> booleanModels) throws IOException {
-		ArrayList<String> lines = new ArrayList<String>();
+	//private void loadBooleanModels(String filename, String directory,
+	//		ArrayList<BooleanModel> booleanModels) throws IOException {
 
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
+	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) throws IOException {
 
-		try {
-			while (true) {
-				String line = reader.readLine();
-				// no more lines to read
-				if (line == null) {
-					reader.close();
-					break;
-				}
-
-				if (!line.startsWith("#")) {
-					lines.add(line);
-				}
-			}
-		}
-
-		finally {
-			reader.close();
-		}
-
+    System.out.println("HERE: " + directory);
 		// Each line is the filename of a model
-		for (int i = 0; i < lines.size(); i++) {
-			booleanModels.add(new BooleanModel(lines.get(i)));
+    
+    File[] files = new File(directory).listFiles();
+
+		for (int i = 0; i < files.length; i++) {
+      File f = files[i];
+      
+      System.out.println("HERE: " + f.getPath());
+			booleanModels.add(new BooleanModel(f.getPath()));
 		}
 	}
 

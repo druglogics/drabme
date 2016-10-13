@@ -25,14 +25,21 @@ public class Launcher {
 		String filenameSummary;
 
 		// // 20160211 Final round submission
-		String filenameResponseData = "toy_ags_response_data.tab";
-		String filenameDrugs = "toy_ags_drugs.tab";
-		String filenameModelOutputs = "toy_ags_modeloutputs.tab";
-		String filenameCombinations = "toy_ags_perturbations.tab";
+		//String filenameResponseData = "toy_ags_response_data.tab";
+		//String filenameDrugs = "toy_ags_drugs.tab";
+		//String filenameModelOutputs = "toy_ags_modeloutputs.tab";
+		//String filenameCombinations = "toy_ags_perturbations.tab";
 
-		String[] dirProjectsArray = { "toy_ags_network_toy_ags_steadystate" };
+		//String[] dirProjectsArray = { "toy_ags_network_toy_ags_steadystate" };
 
-		String[] filenameBooleanModelsArray = { "toy_ags_network_toy_ags_steadystate_models.txt" };
+		//String[] filenameBooleanModelsArray = { "toy_ags_network_toy_ags_steadystate_models.txt" };
+
+		String filenameResponseData = args[0];
+		String filenameDrugs = args[1];
+		String filenameModelOutputs = args[2];
+		String filenameCombinations = args[3];
+
+		String modelDirectory = args[4];
 
 		// TEMPLATE
 		// String filenameResponseData = "" ;
@@ -50,29 +57,16 @@ public class Launcher {
 
 		Thread t;
 
-		for (int i = 0; i < dirProjectsArray.length; i++) {
-			dirProject = dirProjectsArray[i] + "/";
-			filenameBooleanModels = dirProject + filenameBooleanModelsArray[i];
-			filenameOutput = filenameBooleanModels + "_output.txt";
-			filenameSummary = filenameBooleanModels + "_summary.txt";
-
-			t = new Thread(new Drabme(verbosity, filenameBooleanModels,
-					filenameDrugs, filenameCombinations, filenameResponseData,
-					filenameModelOutputs, filenameOutput, filenameSummary,
-					combosize));
-			t.start();
-			try {
-				t.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		// Thread t = new Thread(new Drabme(verbosity, filenameBooleanModels,
-		// filenameDrugs, filenameCombinations, filenameResponseData,
-		// filenameModelOutputs, filenameOutput, filenameSummary, combosize)) ;
-
-		// t.start();
+    t = new Thread(new Drabme(verbosity, modelDirectory,
+          filenameDrugs, filenameCombinations, filenameResponseData,
+          filenameModelOutputs, "output.txt", "summary.txt", combosize));
+    t.start();
+    try {
+      t.join();
+    } catch (InterruptedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
 
 	}
 
