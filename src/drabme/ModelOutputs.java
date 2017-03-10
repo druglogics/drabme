@@ -12,8 +12,11 @@ public class ModelOutputs {
 
 	private ArrayList<OutputWeight> modelOutputs;
 
-	public ModelOutputs(String filename) throws IOException {
+	private Logger logger ;
+	
+	public ModelOutputs(String filename, Logger logger) throws IOException {
 
+		this.logger = logger ;
 		modelOutputs = new ArrayList<OutputWeight>();
 
 		loadModelOutputsFile(filename);
@@ -75,7 +78,7 @@ public class ModelOutputs {
 			modelOutputs.add(new OutputWeight(temp[0].trim(), Integer
 					.parseInt(temp[1].trim())));
 
-			Logger.output(2, "Added model output " + temp[0].trim()
+			logger.output(2, "Added model output " + temp[0].trim()
 					+ " with weight " + Integer.parseInt(temp[1].trim()));
 		}
 	}

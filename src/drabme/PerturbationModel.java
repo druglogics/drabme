@@ -19,13 +19,16 @@ public class PerturbationModel extends BooleanModel {
 	private ModelOutputs modelOutputs;
 	private int globaloutput;
 	private boolean hasGlobalOutput = false;
+	private Logger logger ;
 
 	public PerturbationModel(BooleanModel booleanModel,
-			Perturbation perturbation, ModelOutputs modelOutputs) {
+			Perturbation perturbation, ModelOutputs modelOutputs, Logger logger) {
 
 		// Copy constructor from parent
-		super(booleanModel);
+		super(booleanModel, logger);
 
+		this.logger = logger ;
+		
 		this.perturbation = perturbation;
 
 		this.modelOutputs = modelOutputs;
@@ -37,7 +40,7 @@ public class PerturbationModel extends BooleanModel {
 					+ perturbation.getDrugs()[i].getName();
 		}
 
-		Logger.output(3, "Created perturbation model: " + this.modelName);
+		logger.output(3, "Created perturbation model: " + this.modelName);
 
 		// define perturbations in model
 		for (int i = 0; i < perturbation.getDrugs().length; i++) {
@@ -46,8 +49,8 @@ public class PerturbationModel extends BooleanModel {
 			// this.inhibitNodes (perturbation.getDrugs()[i].getTargets ()) ;
 		}
 
-		Logger.output(3, "\nModel: " + this.modelName);
-		Logger.output(3, this.printBooleanModelBooleannet());
+		logger.output(3, "\nModel: " + this.modelName);
+		logger.output(3, this.printBooleanModelBooleannet());
 
 	}
 
@@ -67,9 +70,9 @@ public class PerturbationModel extends BooleanModel {
 	public void calculateGlobalOutput() throws IOException {
 
 		if (stableStates.size() == 0) {
-			Logger.output(2, "No stable states found");
+			logger.output(2, "No stable states found");
 
-			Logger.output(
+			logger.output(
 					2,
 					PerturbationPanel.getCombinationName(perturbation
 							.getDrugs()) + "\tNA");
@@ -95,11 +98,11 @@ public class PerturbationModel extends BooleanModel {
 
 			globaloutput /= stableStates.size();
 
-			// Logger.output(2, "Global output: " + globaloutput) ;
+			// logger.output(2, "Global output: " + globaloutput) ;
 
 			String line = new String();
 
-			Logger.output(
+			logger.output(
 					2,
 					PerturbationPanel.getCombinationName(perturbation
 							.getDrugs()) + "\t" + globaloutput);
@@ -148,13 +151,13 @@ public class PerturbationModel extends BooleanModel {
 		int index = super.getIndexOfEquation(nodeName);
 
 		if (index >= 0) {
-			Logger.output(2, "Fixing state of node " + nodeName + " value: "
+			logger.output(2, "Fixing state of node " + nodeName + " value: "
 					+ value + " (equation index: " + index + ")");
 
 			if (index >= 0) {
 				booleanEquations.set(index, new BooleanEquation("  " + nodeName
 						+ " *= " + value + " "));
-				// Logger.output(2,
+				// logger.output(2,
 				// booleanEquations.get(index).getBooleanEquation()) ;
 			}
 		}

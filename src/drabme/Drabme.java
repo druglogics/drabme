@@ -34,28 +34,39 @@ public class Drabme implements Runnable {
 	private int verbosity;
 
 	// inputs
-	private String modelDirectory;
+//	private String filenameModelsIndex;
 
 	private String filenameDrugs;
 	private String filenameCombinations;
 	private String filenameModelOutputs;
 	private String filenameOutput;
 	private String filenameSummary;
-	private String filenameDrugResponseObservations;
-
+//	private String filenameDrugResponseObservations;
+//	private String directoryProject ;
+	private String directoryModels ;
+	private String directoryTmp ;
+	
 	private int combosize;
 
-	public Drabme(int verbosity, String modelDirectory,
-			String filenameDrugs, String filenameCombinations,
-			String filenameModelOutputs, String filenameOutput,
-			String filenameSummary, int combosize) {
+	private Logger logger ;
+	
+	public Drabme(int verbosity, 
+			String directoryModels,
+			String filenameDrugs, 
+			String filenameCombinations,
+			String filenameModelOutputs, 
+			String filenameOutput,
+			String filenameSummary,
+			String directoryTmp,
+			int combosize) {
 
 		// Set variables
 		this.filenameDrugs = filenameDrugs;
 		this.filenameModelOutputs = filenameModelOutputs;
-		this.modelDirectory = modelDirectory;
+		this.directoryModels = directoryModels ;
 		this.filenameOutput = filenameOutput;
 		this.filenameSummary = filenameSummary;
+		this.directoryTmp = directoryTmp ;
 		this.combosize = combosize;
 		this.verbosity = verbosity;
 
@@ -64,33 +75,39 @@ public class Drabme implements Runnable {
 
 	}
 
-	public Drabme(int verbosity, String modelDirectory,
-			String filenameDrugs, String filenameCombinations,
-			String filenameDrugResponseObservations,
-			String filenameModelOutputs, String filenameOutput,
-			String filenameSummary, int combosize) {
-
-		// Set variables
-		this.filenameDrugs = filenameDrugs;
-		this.filenameModelOutputs = filenameModelOutputs;
-		this.modelDirectory = modelDirectory;
-		this.filenameOutput = filenameOutput;
-		this.filenameSummary = filenameSummary;
-		this.combosize = combosize;
-		this.verbosity = verbosity;
-		this.filenameDrugResponseObservations = filenameDrugResponseObservations;
-
-		if (filenameCombinations.length() > 0)
-			this.filenameCombinations = filenameCombinations;
-
-	}
+//	public Drabme(int verbosity, 
+//			String filenameModelsIndex,
+//			String filenameModels ,
+//			String filenameDrugs, 
+//			String filenameCombinations,
+//			String filenameModelOutputs, 
+//			String filenameOutput,
+//			String filenameSummary, 
+//			int combosize) {
+//
+//		// Set variables
+//		this.filenameModelsIndex = filenameModelsIndex ;
+//		this.filenameDrugs = filenameDrugs;
+//		this.filenameModelOutputs = filenameModelOutputs;
+////		this.modelDirectory = modelDirectory;
+//		this.filenameOutput = filenameOutput;
+//		this.filenameSummary = filenameSummary;
+//		this.combosize = combosize;
+//		this.verbosity = verbosity;
+////		this.directoryProject = directoryProject ;
+////		this.filenameDrugResponseObservations = filenameDrugResponseObservations;
+//
+//		if (filenameCombinations.length() > 0)
+//			this.filenameCombinations = filenameCombinations;
+//
+//	}
 
 	@Override
 	public void run() {
 		// Initialize logger
 		String directory = System.getProperty("user.dir") + File.separator;
 		try {
-			Logger.initialize(filenameOutput, filenameSummary, this.appName
+			logger = new Logger (filenameOutput, filenameSummary, this.appName
 					+ "_debug.txt", directory, verbosity, false, true);
 		} catch (IOException e3) {
 			// TODO Auto-generated catch block
@@ -103,26 +120,23 @@ public class Drabme implements Runnable {
 		long starttime = System.nanoTime();
 
 		// Output header
-		Logger.outputHeader(1, this.appName + " " + this.version);
-		Logger.output(1, "Analysis start: " + dateFormat.format(cal.getTime()));
+		logger.outputHeader(1, this.appName + " " + this.version);
+		logger.output(1, "Analysis start: " + dateFormat.format(cal.getTime()));
 
-		// -------------------
-		// Clean tmp directory
-		// -------------------
-		cleanTmpDirectory(new File(
-				"./tmp"));
-		Logger.output(2, "Cleaning tmp directory...");
 
 		// ---------------
 		// Load all models
 		// ---------------
-		Logger.outputHeader(2, "Loading Boolean models");
+		
+		
+				
+		logger.outputHeader(2, "Loading Boolean models");
 
 		ArrayList<BooleanModel> booleanModels = new ArrayList<BooleanModel>();
 
 		try {
 			//this.loadBooleanModels(filenameBooleanModels, "", booleanModels);
-			this.loadBooleanModels(modelDirectory, booleanModels);
+			this.loadBooleanModels(directoryModels, booleanModels);
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -132,26 +146,26 @@ public class Drabme implements Runnable {
 		// Load drugs
 		// ----------
 
-		Logger.outputHeader(2, "Loading drug panel");
+		logger.outputHeader(2, "Loading drug panel");
 
 		DrugPanel drugPanel;
 
 		try {
-			drugPanel = new DrugPanel(filenameDrugs);
+			drugPanel = new DrugPanel(filenameDrugs, logger);
 
 			// Create drug combinations based on combosize
 			// drugPanel.createCombinations(combosize);
 
 		} catch (IOException e) {
 
-			Logger.output(1, "ERROR: Couldn't load drugs file: "
+			logger.output(1, "ERROR: Couldn't load drugs file: "
 					+ filenameDrugs);
-			Logger.output(1, "Writing template drugs file: " + filenameDrugs);
+			logger.output(1, "Writing template drugs file: " + filenameDrugs);
 
 			try {
 				DrugPanel.saveDrugPanelFileTemplate(filenameDrugs);
 			} catch (IOException e2) {
-				Logger.output(1, "ERROR: Couldn't write template drugs file.");
+				logger.output(1, "ERROR: Couldn't write template drugs file.");
 				e2.printStackTrace();
 			}
 
@@ -163,7 +177,7 @@ public class Drabme implements Runnable {
 		// Define perturbations based on drugs and drug combinations (drugpanel)
 		// ---------------------------------------------------------------------
 
-		Logger.outputHeader(2, "Defining perturbations");
+		logger.outputHeader(2, "Defining perturbations");
 
 		Drug[][] drugperturbations = null;
 
@@ -181,59 +195,59 @@ public class Drabme implements Runnable {
 		// PerturbationPanel perturbationPanel = new PerturbationPanel
 		// (drugPanel.getCombinations(combosize), drugPanel) ;
 		PerturbationPanel perturbationPanel = new PerturbationPanel(
-				drugperturbations, drugPanel);
+				drugperturbations, drugPanel, logger);
 
 		// --------------------------------------------
 		// Load drug perturbation response observations
 		// --------------------------------------------
 
-		Logger.outputHeader(2, "Loading experimentally observed data");
-		try {
-			perturbationPanel.loadObservationData(filenameDrugResponseObservations);
-		} catch (IOException e1) {
-
-			Logger.output(1,
-					"ERROR: Couldn't load drug response observations: "
-							+ filenameDrugResponseObservations);
-
-			Logger.output(1, "Writing template drug response data file: "
-					+ filenameDrugResponseObservations);
-
-			try {
-				PerturbationPanel.writeObservationsTemplateFile(
-						perturbationPanel.getPerturbations(),
-						filenameDrugResponseObservations);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				Logger.output(1,
-						"ERROR: Couldn't write drug response observation data");
-				e.printStackTrace();
-			}
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-
-			return;
-		}
+//		logger.outputHeader(2, "Loading experimentally observed data");
+//		try {
+//			perturbationPanel.loadObservationData(filenameDrugResponseObservations);
+//		} catch (IOException e1) {
+//
+//			logger.output(1,
+//					"ERROR: Couldn't load drug response observations: "
+//							+ filenameDrugResponseObservations);
+//
+//			logger.output(1, "Writing template drug response data file: "
+//					+ filenameDrugResponseObservations);
+//
+//			try {
+//				PerturbationPanel.writeObservationsTemplateFile(
+//						perturbationPanel.getPerturbations(),
+//						filenameDrugResponseObservations);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				logger.output(1,
+//						"ERROR: Couldn't write drug response observation data");
+//				e.printStackTrace();
+//			}
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//
+//			return;
+//		}
 
 		// -------------------
 		// Load output weights
 		// -------------------
-		Logger.outputHeader(2, "Loading model outputs");
+		logger.outputHeader(2, "Loading model outputs");
 		ModelOutputs outputs;
 
 		try {
-			outputs = new ModelOutputs(filenameModelOutputs);
+			outputs = new ModelOutputs(filenameModelOutputs, logger);
 		} catch (IOException e) {
 
-			Logger.output(1, "ERROR: Couldn't load model outputs file: "
+			logger.output(1, "ERROR: Couldn't load model outputs file: "
 					+ filenameModelOutputs);
-			Logger.output(1, "Writing template model outputs file: "
+			logger.output(1, "Writing template model outputs file: "
 					+ filenameModelOutputs);
 
 			try {
 				ModelOutputs.saveModelOutputsFileTemplate(filenameModelOutputs);
 			} catch (IOException e2) {
-				Logger.output(1,
+				logger.output(1,
 						"ERROR: Couldn't write template model outputs file.");
 				e2.printStackTrace();
 			}
@@ -247,7 +261,7 @@ public class Drabme implements Runnable {
 		// ----------------------------
 
 		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel,
-				booleanModels, outputs);
+				booleanModels, outputs, directoryTmp, logger);
 
 		try {
 			dra.analyze();
@@ -260,8 +274,8 @@ public class Drabme implements Runnable {
 		// Summary
 		// -------
 
-		Logger.outputHeader(1, "Drug perturbation responses");
-		Logger.output(1, "Perturbation" + "\t" + "Average" + "\t" + "SD" + "\t"
+		logger.outputHeader(1, "Drug perturbation responses");
+		logger.output(1, "Perturbation" + "\t" + "Average" + "\t" + "SD" + "\t"
 				+ "Data");
 
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
@@ -273,7 +287,7 @@ public class Drabme implements Runnable {
 				individualresponses += "\t" + perturbation.getPredictions()[j];
 			}
 
-			Logger.output(
+			logger.output(
 					1,
 					perturbation.getName()
 							+ "\t"
@@ -288,15 +302,15 @@ public class Drabme implements Runnable {
 		// Synergies vs non-synergies
 		// --------------------------
 
-		Logger.outputHeader(1, "Synergy observations, model-wise");
-		Logger.output(1, "Perturbation" + "\t" + "Synergies" + "\t"
+		logger.outputHeader(1, "Synergy observations, model-wise");
+		logger.output(1, "Perturbation" + "\t" + "Synergies" + "\t"
 				+ "Non-synergies");
 
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
 			if (perturbation.getDrugs().length >= 2) {
-				Logger.output(
+				logger.output(
 						1,
 						perturbation.getName() + "\t"
 								+ perturbation.getSynergyPredictions() + "\t"
@@ -304,19 +318,21 @@ public class Drabme implements Runnable {
 			}
 		}
 
+		
+
 		// ----------
 		// Statistics
 		// ----------
 
-		Logger.outputHeader(1, "Statistics");
+		logger.outputHeader(1, "Statistics");
 
 		StatisticalAnalysis sa = new StatisticalAnalysis(perturbationPanel);
 
-		Logger.outputHeader(1, "Average responses");
+		logger.outputHeader(1, "Average responses");
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
-			Logger.output(
+			logger.output(
 					1,
 					perturbation.getName() + "\t"
 							+ perturbation.getAveragePredictedResponse());
@@ -326,12 +342,12 @@ public class Drabme implements Runnable {
 		// i.e. pairwise combination: PD-PI vs min(PD, PI)
 		// i.e. threeway combination: PD-PI-5Z vs min(PD-PI, PD-5Z, PI-5Z)
 		
-		Logger.outputHeader(1, "Combinatorial response over subsets");
+		logger.outputHeader(1, "Combinatorial response over subsets");
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
 			if (perturbation.getDrugs().length >= 2) {
-				Logger.output(
+				logger.output(
 						1,
 						perturbation.getName()
 								+ "\t"
@@ -344,57 +360,65 @@ public class Drabme implements Runnable {
 		// Predicted vs observed data
 		// --------------------------
 
-		int combinationsize = 2;
-
-		String obs = "Observed";
-		for (int i = 0; i < perturbationPanel
-				.getObservedCombinationResponses(combinationsize).length; i++) {
-			obs += "\t"
-					+ perturbationPanel
-							.getObservedCombinationResponses(combinationsize)[i];
-		}
-
-		String pred = "Predicted";
-		for (int i = 0; i < perturbationPanel
-				.getPredictedAverageCombinationResponses(combinationsize).length; i++) {
-			pred += "\t"
-					+ perturbationPanel
-							.getPredictedAverageCombinationResponses(combinationsize)[i];
-		}
-
-		String combinationNames = "";
-
-		for (int i = 0; i < perturbationPanel.getPerturbations(combinationsize).length; i++) {
-			combinationNames += "\t"
-					+ perturbationPanel.getPerturbations(combinationsize)[i]
-							.getName();
-		}
-		Logger.output(2, combinationNames);
-		Logger.output(2, obs);
-		Logger.output(2, pred);
-
-		Logger.output(1, "");
-
-		if ((perturbationPanel.getObservedCombinationResponses(combinationsize).length > 0)
-				& perturbationPanel
-						.getPredictedAverageCombinationResponses(combinationsize).length > 0) {
-			Logger.output(
-					1,
-					"Spearman's correlation: "
-							+ sa.getSpearmansCorrelation(combinationsize));
-			Logger.output(
-					1,
-					"Pearson's correlation: "
-							+ sa.getPearsonCorrelation(combinationsize));
-			Logger.output(
-					1,
-					"Kendall's correlation: "
-							+ sa.getKendallsCorrelation(combinationsize));
-			Logger.output(
-					1,
-					"Classification accuracy: "
-							+ sa.getSynergyClassificationAccuracy(combinationsize));
-		}
+//		int combinationsize = 2;
+//
+//		String obs = "Observed";
+//		for (int i = 0; i < perturbationPanel
+//				.getObservedCombinationResponses(combinationsize).length; i++) {
+//			obs += "\t"
+//					+ perturbationPanel
+//							.getObservedCombinationResponses(combinationsize)[i];
+//		}
+//
+//		String pred = "Predicted";
+//		for (int i = 0; i < perturbationPanel
+//				.getPredictedAverageCombinationResponses(combinationsize).length; i++) {
+//			pred += "\t"
+//					+ perturbationPanel
+//							.getPredictedAverageCombinationResponses(combinationsize)[i];
+//		}
+//
+//		String combinationNames = "";
+//
+//		for (int i = 0; i < perturbationPanel.getPerturbations(combinationsize).length; i++) {
+//			combinationNames += "\t"
+//					+ perturbationPanel.getPerturbations(combinationsize)[i]
+//							.getName();
+//		}
+//		logger.output(2, combinationNames);
+//		logger.output(2, obs);
+//		logger.output(2, pred);
+//
+//		logger.output(1, "");
+//
+//		if ((perturbationPanel.getObservedCombinationResponses(combinationsize).length > 0)
+//				& perturbationPanel
+//						.getPredictedAverageCombinationResponses(combinationsize).length > 0) {
+//			logger.output(
+//					1,
+//					"Spearman's correlation: "
+//							+ sa.getSpearmansCorrelation(combinationsize));
+//			logger.output(
+//					1,
+//					"Pearson's correlation: "
+//							+ sa.getPearsonCorrelation(combinationsize));
+//			logger.output(
+//					1,
+//					"Kendall's correlation: "
+//							+ sa.getKendallsCorrelation(combinationsize));
+//			logger.output(
+//					1,
+//					"Classification accuracy: "
+//							+ sa.getSynergyClassificationAccuracy(combinationsize));
+//		}
+		
+		
+		// -------------------
+				// Clean tmp directory
+				// -------------------
+//				cleanTmpDirectory(new File(
+//						directoryTmp));
+//				logger.output(2, "Cleaning tmp directory...");
 
 		// -------
 		// The end
@@ -407,12 +431,12 @@ public class Drabme implements Runnable {
 		int minutes = (int) ((duration / 60) % 60);
 		int hours = (int) ((duration / (60 * 60)));
 
-		Logger.outputHeader(1, "\nThe end");
-		Logger.output(1, "End: " + dateFormat.format(cal.getTime()));
-		Logger.output(1, "Analysis completed in " + hours + " hours, "
+		logger.outputHeader(1, "\nThe end");
+		logger.output(1, "End: " + dateFormat.format(cal.getTime()));
+		logger.output(1, "Analysis completed in " + hours + " hours, "
 				+ minutes + " minutes, and " + seconds + " seconds ");
 
-		Logger.output(1, "\nWith that we say thank you and good bye!");
+		logger.output(1, "\nWith that we say thank you and good bye!");
 	}
 
 	private void cleanTmpDirectory(File dir) {
@@ -428,16 +452,20 @@ public class Drabme implements Runnable {
 
 	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) throws IOException {
 
-    System.out.println("HERE: " + directory);
-		// Each line is the filename of a model
-    
-    File[] files = new File(directory).listFiles();
-
-		for (int i = 0; i < files.length; i++) {
-      File f = files[i];
-      
-      System.out.println("HERE: " + f.getPath());
-			booleanModels.add(new BooleanModel(f.getPath()));
+//	    System.out.println("HERE: " + directory);
+			// Each line is the filename of a model
+//	    
+//		if (! new File(directory).isAbsolute())
+//		{
+//			directory = System.getProperty("user.dir") + File.separator + "models" ;
+//		}
+	    		File[] files = new File(directory).listFiles();
+		
+	    for (int i = 0; i < files.length; i++) {
+	    File f = files[i];
+	      
+//    	System.out.println("HERE: " + f.getPath());
+		booleanModels.add(new BooleanModel(f.getPath(), logger));
 		}
 	}
 

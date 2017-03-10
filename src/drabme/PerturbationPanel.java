@@ -15,17 +15,20 @@ public class PerturbationPanel {
 
 	Perturbation[] perturbations;
 	DrugPanel drugPanel;
+	Logger logger ;
 
-	public PerturbationPanel(Drug[][] perturbations, DrugPanel drugPanel) {
+	public PerturbationPanel(Drug[][] perturbations, DrugPanel drugPanel, Logger logger) {
 
+		this.logger = logger ;
+		
 		this.drugPanel = drugPanel;
 		this.perturbations = new Perturbation[perturbations.length];
 
 		for (int i = 0; i < perturbations.length; i++) {
-			this.perturbations[i] = new Perturbation(perturbations[i]);
+			this.perturbations[i] = new Perturbation(perturbations[i], logger);
 		}
 
-		Logger.output(2, this.getCombinationNames(perturbations));
+		logger.output(2, this.getCombinationNames(perturbations));
 	}
 
 	/**
@@ -81,12 +84,12 @@ public class PerturbationPanel {
 				int index = this.getIndexOfPerturbation(drugs);
 
 				if (index >= 0) {
-					Logger.output(2, "Observation for drug combination "
+					logger.output(2, "Observation for drug combination "
 							+ PerturbationPanel.getCombinationName(drugs)
 							+ ", observed data: " + response);
 					perturbations[index].addObservation(response);
 				} else {
-					Logger.output(
+					logger.output(
 							2,
 							"Observation file contains observations on drug combination "
 									+ PerturbationPanel
@@ -95,7 +98,7 @@ public class PerturbationPanel {
 				}
 
 			} else {
-				Logger.output(
+				logger.output(
 						2,
 						"Observation file contains observations on drug combination not in drugpanel: "
 								+ PerturbationPanel.getCombinationName(Arrays
@@ -217,11 +220,11 @@ public class PerturbationPanel {
 				.getDrugs());
 		int indexSubset[] = new int[subsets.length];
 
-		// Logger.output(1, perturbations[index].getName());
+		// logger.output(1, perturbations[index].getName());
 
 		for (int i = 0; i < subsets.length; i++) {
 			indexSubset[i] = getIndexOfPerturbation(subsets[i]);
-			// Logger.output(1, perturbations[indexSubset[i]].getName());
+			// logger.output(1, perturbations[indexSubset[i]].getName());
 		}
 
 		double minimumResponseSubset = perturbations[indexSubset[0]]
@@ -236,7 +239,7 @@ public class PerturbationPanel {
 					perturbations[indexSubset[i]].getAveragePredictedResponse());
 		}
 
-		// Logger.output(1, "min: " + minimumResponseSubset + " max: " +
+		// logger.output(1, "min: " + minimumResponseSubset + " max: " +
 		// maximumResponseSubset);
 		if (response < minimumResponseSubset)
 			return response - minimumResponseSubset;

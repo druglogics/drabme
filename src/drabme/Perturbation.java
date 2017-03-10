@@ -24,8 +24,11 @@ public class Perturbation {
 
 	private boolean isStatisticsCalculated = false;
 
-	public Perturbation(Drug[] perturbation) {
+	private Logger logger ;
+	
+	public Perturbation(Drug[] perturbation, Logger logger) {
 
+		this.logger = logger ;
 		drugs = perturbation;
 		predictedResponses = new ArrayList<Integer>();
 
@@ -35,7 +38,7 @@ public class Perturbation {
 		// Report if any drugs passed are without defined targets
 		for (int i = 0; i < perturbation.length; i++) {
 			if (drugs[i].getTargets().size() == 0) {
-				Logger.output(2, "Added drug " + drugs[i].getName()
+				logger.output(2, "Added drug " + drugs[i].getName()
 						+ " which has no targets to perturbations");
 			}
 		}

@@ -18,10 +18,14 @@ public class DrugPanel {
 	// Panel of single drugs to be used
 	protected ArrayList<Drug> drugs;
 
+	private Logger logger ;
 	// Panel of perturbations, given combination sizes
 	// protected ArrayList <Drug[]> perturbations ;
 
-	public DrugPanel(String filename) throws IOException {
+	public DrugPanel(String filename, Logger logger) throws IOException {
+		
+		this.logger = logger ;
+		
 		drugs = new ArrayList<Drug>();
 
 		loadDrugsFromFile(filename);
@@ -124,7 +128,7 @@ public class DrugPanel {
 
 		for (int i = 0; i < lines.size(); i++) {
 			// Add drug name
-			drugs.add(new Drug(lines.get(i).split("\t")[0]));
+			drugs.add(new Drug(lines.get(i).split("\t")[0], logger));
 
 			// Add perturbation effect
 
@@ -134,7 +138,7 @@ public class DrugPanel {
 			} else if (effect.equals("activates")) {
 				drugs.get(i).addEffect(true);
 			} else {
-				Logger.output(1,
+				logger.output(1,
 						"ERROR: Drug effect not annotated as either \"activates\" or \"inhibits\" "
 								+ (effect));
 			}
@@ -185,7 +189,7 @@ public class DrugPanel {
 					combination[j] = getDrug(drugname);
 					// System.out.println(combination[j].getName()) ;
 				} else {
-					Logger.output(1,
+					logger.output(1,
 							"ERROR: Combination refers to drug not in drugpanel: "
 									+ lines.get(i).split("\t")[j]);
 				}
@@ -195,7 +199,7 @@ public class DrugPanel {
 			perturbations.add(combination);
 		}
 
-		// Logger.outputHeader(2, "Loaded combinations from file");
+		// logger.outputHeader(2, "Loaded combinations from file");
 		//
 		// for (int i = 0; i < perturbations.size(); i++)
 		// {
@@ -207,7 +211,7 @@ public class DrugPanel {
 		// output += "-" ;
 		//
 		// }
-		// Logger.output(2, output);
+		// logger.output(2, output);
 		// }
 		//
 
@@ -281,16 +285,16 @@ public class DrugPanel {
 
 		// if (Drabme.verbosity >= 2)
 		// {
-		// Logger.output(2, "\n" + (perturbations.size()-1) +
+		// logger.output(2, "\n" + (perturbations.size()-1) +
 		// " conditions added to perturbation set:");
 		//
 		// for (int i = 0; i < perturbations.size (); i++)
 		// {
 		// for (int j = 0; j < perturbations.get(i).length; j++)
 		// {
-		// Logger.output(2, perturbations.get(i)[j].getName() + " ") ;
+		// logger.output(2, perturbations.get(i)[j].getName() + " ") ;
 		// }
-		// Logger.output(2, "") ;
+		// logger.output(2, "") ;
 		// }
 		// }
 		return perturbations.toArray(new Drug[0][]);

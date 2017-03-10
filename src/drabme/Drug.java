@@ -9,18 +9,22 @@ public class Drug {
 	private String name ;
 	private ArrayList <String> targets ;
 	private boolean effect ;
+	private Logger logger ;
 	
 	/**
 	 * 
 	 * @param name
 	 *            of drug
 	 */
-	public Drug(String name) {
+	public Drug(String name, Logger logger) {
 
-		Logger.output(1, "Added drug " + name);
+		this.logger = logger ;
+		logger.output(1, "Added drug " + name);
 
 		this.name = name;
 		targets = new ArrayList<String>();
+		
+		
 	}
 
 	/**
@@ -38,7 +42,7 @@ public class Drug {
 		else
 			effector = "inhibitor";
 
-		Logger.output(2, "Drug " + name + " annotated as " + effector);
+		logger.output(2, "Drug " + name + " annotated as " + effector);
 
 		this.effect = effect;
 	}
@@ -65,7 +69,7 @@ public class Drug {
 	 *            to be added
 	 */
 	public void addTarget(String target) {
-		Logger.output(2, "Added target " + target + " to drug " + name);
+		logger.output(2, "Added target " + target + " to drug " + name);
 
 		targets.add(target);
 	}
@@ -76,7 +80,7 @@ public class Drug {
 	 *            to be removed
 	 */
 	public void removeTarget(String target) {
-		Logger.output(2, "Removed target " + target + " from drug " + name);
+		logger.output(2, "Removed target " + target + " from drug " + name);
 
 		targets.remove(targets.indexOf(target));
 	}

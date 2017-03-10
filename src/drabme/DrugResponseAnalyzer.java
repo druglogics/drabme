@@ -12,13 +12,20 @@ public class DrugResponseAnalyzer {
 	private final ArrayList<BooleanModel> booleanModels;
 	private ModelOutputs modelOutputs;
 
+	private Logger logger ;
+	
+	private String directoryTmp ;
+	
 	public DrugResponseAnalyzer(PerturbationPanel perturbationPanel,
-			ArrayList<BooleanModel> booleanModels, ModelOutputs modelOutputs) {
-		// TODO Auto-generated constructor stub
-
+								ArrayList<BooleanModel> booleanModels, 
+								ModelOutputs modelOutputs, 
+								String directoryTmp, 
+								Logger logger) {
+		this.logger = logger ;
 		this.perturbationPanel = perturbationPanel;
 		this.booleanModels = booleanModels;
 		this.modelOutputs = modelOutputs;
+		this.directoryTmp = directoryTmp ;
 
 	}
 
@@ -28,11 +35,11 @@ public class DrugResponseAnalyzer {
 
 		// Perform all simulations of given models with given drug combinations
 		for (int modelIndex = 0; modelIndex < booleanModels.size(); modelIndex++) {
-			Logger.output(2, "Adding model "
+			logger.output(2, "Adding model "
 					+ booleanModels.get(modelIndex).getModelName());
 
 			ResponseModel rm = new ResponseModel(booleanModels.get(modelIndex),
-					modelOutputs, perturbationPanel);
+					modelOutputs, perturbationPanel, logger);
 
 			for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 
@@ -41,18 +48,18 @@ public class DrugResponseAnalyzer {
 				for (int j = 0; j < perturbationPanel.getPerturbations()[i]
 						.getDrugs().length; j++) {
 
-					if (Logger.getVerbosity() >= 2) {
+					if (logger.getVerbosity() >= 2) {
 						msg += perturbationPanel.getPerturbations()[i]
 								.getDrugs()[j].getName() + " ";
 					}
 
 				}
-				Logger.output(2, "Added simulation with drug(s): " + msg
+				logger.output(2, "Added simulation with drug(s): " + msg
 						+ "to model: " + rm.getModelName());
 			}
 
 			rm.initializeResponseModel();
-			rm.simulateResponses();
+			rm.simulateResponses(directoryTmp);
 
 			responseModels.add(rm);
 		}

@@ -30,9 +30,14 @@ public class ResponseModel {
 	private ArrayList<PerturbationModel> perturbationModels;
 
 	private ModelOutputs modelOutputs;
+	
+	private Logger logger ;
 
 	public ResponseModel(BooleanModel booleanModel, ModelOutputs modelOutputs,
-			PerturbationPanel perturbationPanel) {
+			PerturbationPanel perturbationPanel, Logger logger) {
+		
+		this.logger = logger ;
+		
 		this.originalModel = booleanModel;
 
 		this.perturbationPanel = perturbationPanel;
@@ -53,23 +58,26 @@ public class ResponseModel {
 		// Define model for each perturbation set
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			perturbationModels.add(new PerturbationModel(originalModel,
-					perturbationPanel.getPerturbations()[i], modelOutputs));
+					perturbationPanel.getPerturbations()[i], modelOutputs, logger));
 		}
 
 	}
 
-	public void simulateResponses() throws IOException {
+	public void simulateResponses(String directoryTmp) throws IOException {
 		for (int i = 0; i < perturbationModels.size(); i++) {
-			Logger.output(2, ""); // Just to add blank line per output in
+			logger.output(2, ""); // Just to add blank line per output in
 									// results file to structure results
 
 			// Calculate stable state(s), then determine global output
-			perturbationModels.get(i).calculateStableStatesVC( "./output");
+//			perturbationModels.get(i).calculateStableStatesVC( "./output"); // for rbbt
+//			perturbationModels.get(i).calculateStableStatesVC("/home/asmund/git/drabme/toy_ags_network_toy_ags_steadystate/tmp");
+			perturbationModels.get(i).calculateStableStatesVC(directoryTmp);
+			
 			perturbationModels.get(i).calculateGlobalOutput();
 
 			// Store response for perturbation set
 			if (perturbationModels.get(i).hasGlobalOutput()) {
-				Logger.output(2, "Adding predicted response for perturbation "
+				logger.output(2, "Adding predicted response for perturbation "
 						+ perturbationModels.get(i).getPerturbation().getName()
 						+ ": " + perturbationModels.get(i).getGlobalOutput());
 				perturbationModels
@@ -136,7 +144,7 @@ public class ResponseModel {
 					namecombo += combination[i].getName();
 				}
 
-				Logger.output(2, namecombo + " is synergistic");
+				logger.output(2, namecombo + " is synergistic");
 			} else {
 				perturbation.addNonSynergyPrediction();
 				value = false;
@@ -148,7 +156,7 @@ public class ResponseModel {
 					namecombo += combination[i].getName();
 				}
 
-				Logger.output(2, namecombo + " is NOT synergistic");
+				logger.output(2, namecombo + " is NOT synergistic");
 			}
 		} else {
 			String namecombo = "";
@@ -159,7 +167,7 @@ public class ResponseModel {
 				namecombo += combination[i].getName();
 			}
 
-			Logger.output(
+			logger.output(
 					2,
 					namecombo
 							+ " cannot be evaluated for synergy (lacking stable state(s))");
@@ -174,7 +182,7 @@ public class ResponseModel {
 	//
 	// if (combination.length != 2)
 	// {
-	// Logger.output(1,
+	// logger.output(1,
 	// "ERROR: ResponseModel.isPairSynergistic invoked without a proper pair referenced!")
 	// ;
 	// return false ;
@@ -198,14 +206,14 @@ public class ResponseModel {
 	// min(single1response.getGlobalOutput(),
 	// single2response.getGlobalOutput()))
 	// {
-	// Logger.output (2, combination[0].getName() + " + " +
+	// logger.output (2, combination[0].getName() + " + " +
 	// combination[1].getName() + " is synergistic");
 	// perturbations.addSynergyObservation(combination);
 	// value = true ;
 	// }
 	// else
 	// {
-	// Logger.output (2, combination[0].getName() + " + " +
+	// logger.output (2, combination[0].getName() + " + " +
 	// combination[1].getName() + " is NOT synergistic");
 	//
 	// perturbations.addNonSynergyObservation(combination);
