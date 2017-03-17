@@ -49,8 +49,8 @@ public class PerturbationModel extends BooleanModel {
 			// this.inhibitNodes (perturbation.getDrugs()[i].getTargets ()) ;
 		}
 
-		logger.output(3, "\nModel: " + this.modelName);
-		logger.output(3, this.printBooleanModelBooleannet());
+//		logger.output(3, "\nModel: " + this.modelName);
+//		logger.output(3, this.printBooleanModelBooleannet());
 
 	}
 

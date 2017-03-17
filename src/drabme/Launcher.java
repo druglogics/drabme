@@ -24,25 +24,32 @@ public class Launcher {
 		if (args.length == 0)
 		{
 			System.out.println("No user argumetns supplied") ;
-			System.out.println("Usage: drabme <directory models> <filename drugs> <filename model outputs> <directory tmp> [filename combinations]") ;
+			System.out.println("Usage: drabme <directory models> <filename drugs> <filename model outputs> <directory output>"
+					+ " <directory tmp> [filename combinations]") ;
 		
 			System.out.println("\nTestrun: setting up run with example files:");
 
-			args = new String[] {"toy_ags_network_toy_ags_steadystate/models", "toy_ags_drugs.tab", "toy_ags_modeloutputs.tab", "toy_ags_perturbations.tab", "toy_ags_network_toy_ags_steadystate/tmp"} ;
-			System.out.println("drabme " + args[0] + " " + args[1] + " " + args[2] + args[3] + "\n\n")  ;
+			args = new String[] {"ags_example", "toy_ags_network_toy_ags_steadystate/models", "toy_ags_drugs.tab", "toy_ags_modeloutputs.tab", "toy_ags_perturbations.tab", "example", "toy_ags_network_toy_ags_steadystate/tmp"} ;
+			System.out.println("drabme " + args[0] + " " + args[1] + " " + args[2] + " " +  args[3] + " " + args[4] + " " + args[5] + " " + args[6] + "\n\n")  ;
 			
 		}
 		
 //		String filenameResponseData = args[0];
-		String directoryModels = args[0] ;
-		String filenameDrugs = args[1];
-		String filenameModelOutputs = args[2];
-		String filenameCombinations = args[3];
-		String directoryTmp = args[4] ;
+		String projectName = args[0] ;
+		String directoryModels = args[1] ;
+		String filenameDrugs = args[2];
+		String filenameModelOutputs = args[3];
+		String filenameCombinations = args[4];
+		String directoryOutput = args[5] ;
+		String directoryTmp = args[6] ;
 
 		// make sure path to tmp directory is absolute, since BNreduction will be run from another working directory
 		if (!new File (directoryTmp).isAbsolute())
 			directoryTmp = System.getProperty("user.dir") + File.separator + directoryTmp ;
+		
+		if (!new File (directoryOutput).isAbsolute())
+			directoryOutput = System.getProperty("user.dir") + File.separator + directoryOutput ;
+		
 		
 	
 //		DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm");
@@ -84,12 +91,12 @@ public class Launcher {
 		Thread t;
 
     t = new Thread(new Drabme(verbosity, 
+    							projectName,
     							directoryModels,
     							filenameDrugs, 
     							filenameCombinations, 
     							filenameModelOutputs, 
-    							"output.txt", 
-    							"summary.txt", 
+    							directoryOutput,
     							directoryTmp,
     							combosize));
     t.start();
