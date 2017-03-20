@@ -223,7 +223,7 @@ public class Drabme implements Runnable {
 		String filename ;
 		
 		// File to store perturbation responses in, separately
-		filename = new File(directoryOutput, nameProject + "_responses.tab").getAbsolutePath() ; 
+		filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_responses.tab").getAbsolutePath() ; 
 		
 		logger.outputHeader(1, "Drug perturbation responses");
 		logger.output(
@@ -256,7 +256,7 @@ public class Drabme implements Runnable {
 		// --------------------------
 
 		// File to store drug synergies in
-		filename = new File(directoryOutput, nameProject + "_synergies.tab").getAbsolutePath() ;
+		filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_synergies.tab").getAbsolutePath() ;
 		
 		logger.outputHeader(1, "Combinatorial response in excess over subsets, model-wise");
 		logger.output(filename, "Perturbation" + "\t" + "Synergies" + "\t"
@@ -281,15 +281,15 @@ public class Drabme implements Runnable {
 		// ----------
 
 		// File to store average responses in
-		filename = new File (directoryOutput, nameProject + "_average_responses.tab").getAbsolutePath() ;
+		filename = new File (directoryOutput, "output_" + nameProject + "_ensemblewise_responses.tab").getAbsolutePath() ;
 		
 		logger.outputHeader(1, "Statistics");
 
 		StatisticalAnalysis sa = new StatisticalAnalysis(perturbationPanel);
 
-		logger.outputHeader(1, "Average responses");
+		logger.outputHeader(1, "Ensemble average responses");
 		
-		logger.output(filename, "Perturbation" + "\t" + "Average response");
+		logger.output(filename, "Perturbation" + "\t" + "Ensemble average response");
 			
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
@@ -306,7 +306,7 @@ public class Drabme implements Runnable {
 		
 		
 		// File to store excess effects over agerage responses in
-		filename = new File (directoryOutput, nameProject + "_average_responses_excess.tab").getAbsolutePath() ;
+		filename = new File (directoryOutput, "output_" + nameProject + "_ensemblewise_synergies.tab").getAbsolutePath() ;
 		
 		logger.outputHeader(1, "Combinatorial response in excess over subsets (ensemble-wise synergy)");
 		
