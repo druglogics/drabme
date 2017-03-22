@@ -80,7 +80,12 @@ public class Drabme implements Runnable {
 		// Initialize logger
 
 		try {
+<<<<<<< HEAD
 			logger = new Logger (nameProject + "_log.txt", nameProject + "_summary.txt", directoryOutput, verbosity, true);
+=======
+			logger = new Logger (appName + "_" + nameProject + "_log.txt", nameProject + "_summary.txt", this.appName
+					+ "_debug.txt", directoryOutput, verbosity, false, true);
+>>>>>>> 875777f89efa7bb7ec77f9f84356d91a4df97240
 		} catch (IOException e3) {
 			// TODO Auto-generated catch block
 			e3.printStackTrace();
