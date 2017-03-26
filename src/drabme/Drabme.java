@@ -381,7 +381,7 @@ public class Drabme implements Runnable {
 		//tar cvfz tmp.tar.gz tmp
 
 		try {
-			ProcessBuilder pb = new ProcessBuilder("tar", "cvfz", filenameArchive, new File(directory).getParent(), new File(directory).getName());
+			ProcessBuilder pb = new ProcessBuilder("tar", "cvfz", filenameArchive, "-C", new File(directory).getParent(), new File(directory).getName());
 			
 			if (logger.getVerbosity() >= 3)
 			{
