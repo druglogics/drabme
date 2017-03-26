@@ -3,8 +3,10 @@ package drabme;
 import gitsbe.Logger;
 import gitsbe.BooleanModel;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -80,7 +82,7 @@ public class Drabme implements Runnable {
 		// Initialize logger
 
 		try {
-			logger = new Logger (nameProject + "_log.txt", nameProject + "_summary.txt", directoryOutput, verbosity, true);
+			logger = new Logger (appName + "_" + nameProject + "_log.txt", nameProject + "_summary.txt", directoryOutput, verbosity, true);
 		} catch (IOException e3) {
 			// TODO Auto-generated catch block
 			e3.printStackTrace();
@@ -320,70 +322,20 @@ public class Drabme implements Runnable {
 			}
 		}
 		
-		// Write 
-
-		// --------------------------
-		// Predicted vs observed data
-		// --------------------------
-
-//		int combinationsize = 2;
-//
-//		String obs = "Observed";
-//		for (int i = 0; i < perturbationPanel
-//				.getObservedCombinationResponses(combinationsize).length; i++) {
-//			obs += "\t"
-//					+ perturbationPanel
-//							.getObservedCombinationResponses(combinationsize)[i];
-//		}
-//
-//		String pred = "Predicted";
-//		for (int i = 0; i < perturbationPanel
-//				.getPredictedAverageCombinationResponses(combinationsize).length; i++) {
-//			pred += "\t"
-//					+ perturbationPanel
-//							.getPredictedAverageCombinationResponses(combinationsize)[i];
-//		}
-//
-//		String combinationNames = "";
-//
-//		for (int i = 0; i < perturbationPanel.getPerturbations(combinationsize).length; i++) {
-//			combinationNames += "\t"
-//					+ perturbationPanel.getPerturbations(combinationsize)[i]
-//							.getName();
-//		}
-//		logger.output(2, combinationNames);
-//		logger.output(2, obs);
-//		logger.output(2, pred);
-//
-//		logger.output(1, "");
-//
-//		if ((perturbationPanel.getObservedCombinationResponses(combinationsize).length > 0)
-//				& perturbationPanel
-//						.getPredictedAverageCombinationResponses(combinationsize).length > 0) {
-//			logger.output(
-//					1,
-//					"Spearman's correlation: "
-//							+ sa.getSpearmansCorrelation(combinationsize));
-//			logger.output(
-//					1,
-//					"Pearson's correlation: "
-//							+ sa.getPearsonCorrelation(combinationsize));
-//			logger.output(
-//					1,
-//					"Kendall's correlation: "
-//							+ sa.getKendallsCorrelation(combinationsize));
-//			logger.output(
-//					1,
-//					"Classification accuracy: "
-//							+ sa.getSynergyClassificationAccuracy(combinationsize));
-//		}
+	
 		
 		
 		// -------------------
 		// Clean tmp directory
 		// -------------------
-//		logger.output(2, "Cleaning tmp directory...");
-//		cleanTmpDirectory(new File(directoryTmp));
+		
+		String filenameArchive = new File(directoryOutput, nameProject + ".drabme.tmp.tar.gz").getAbsolutePath() ;
+		
+		logger.output(2, "\nCreating archive with all temporary files: " + filenameArchive);
+		compressDirectory (filenameArchive, directoryTmp) ;
+		
+		logger.output(2, "Cleaning tmp directory...");
+		cleanTmpDirectory(new File(directoryTmp));
 
 
 		// -------
@@ -405,12 +357,12 @@ public class Drabme implements Runnable {
 		logger.output(1, "\nWith that we say thank you and good bye!");
 	}
 
-	private void cleanTmpDirectory(File dir) {
-		for (File file : dir.listFiles()) {
-			if (file.isDirectory())
-				cleanTmpDirectory(file);
-			file.delete();
-		}
+	private void cleanTmpDirectory (File dir)
+	{
+	    for (File file: dir.listFiles()) {
+	        if (file.isDirectory()) cleanTmpDirectory(file);
+	        file.delete();
+	    }
 	}
 
 
@@ -424,5 +376,46 @@ public class Drabme implements Runnable {
 		booleanModels.add(new BooleanModel(f.getPath(), logger));
 		}
 	}
+	private void compressDirectory (String filenameArchive, String directory)
+	{
+		//tar cvfz tmp.tar.gz tmp
 
+		try {
+			
+			// "BNReduction_timeout.sh" calls BNReduction.sh, but with the 'timeout' commanding, ensuring that the process has to
+			// complete within specified amount of time (in case BNReduction should hang).
+			
+			
+			ProcessBuilder pb = new ProcessBuilder("tar", "cvfz", filenameArchive, directory);
+			
+			if (logger.getVerbosity() >= 3)
+			{
+				pb.redirectErrorStream(true);
+				pb.redirectOutput() ;
+			}
+			
+			logger.output(3, "Compressing temporary models: " + filenameArchive) ;
+			
+			
+			Process p ;
+			p = pb.start ();
+			
+			try {
+				p.waitFor() ;
+				
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            while(r.ready()) {
+	        	logger.output(3, r.readLine());
+            }
+		
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }
