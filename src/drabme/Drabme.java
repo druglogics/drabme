@@ -204,6 +204,14 @@ public class Drabme implements Runnable {
 		// Run simulations and Analyzer
 		// ----------------------------
 
+		// Create temp directory
+		if (!new File (directoryTmp).mkdir())
+		{
+			System.out.println("Error creating temporary folder, exiting.") ;
+			return ;
+		}
+		
+		
 		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel,
 				booleanModels, outputs, directoryTmp, logger);
 
@@ -329,13 +337,13 @@ public class Drabme implements Runnable {
 		// Clean tmp directory
 		// -------------------
 		
-		String filenameArchive = new File(directoryOutput, nameProject + ".drabme.tmp.tar.gz").getAbsolutePath() ;
-		
-		logger.output(2, "\nCreating archive with all temporary files: " + filenameArchive);
-		compressDirectory (filenameArchive, directoryTmp) ;
-		
-		logger.output(2, "Cleaning tmp directory...");
-		cleanTmpDirectory(new File(directoryTmp));
+		//String filenameArchive = new File(directoryOutput, nameProject + ".drabme.tmp.tar.gz").getAbsolutePath() ;
+		//
+		//logger.output(2, "\nCreating archive with all temporary files: " + filenameArchive);
+		//compressDirectory (filenameArchive, directoryTmp) ;
+		//
+		//logger.output(2, "Cleaning tmp directory...");
+		//cleanTmpDirectory(new File(directoryTmp));
 
 
 		// -------
