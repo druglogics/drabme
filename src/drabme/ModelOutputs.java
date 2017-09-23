@@ -1,5 +1,6 @@
 package drabme;
 
+import gitsbe.BooleanModel;
 import gitsbe.Logger;
 
 import java.io.BufferedReader;
@@ -30,6 +31,53 @@ public class ModelOutputs {
 		return modelOutputs.get(index);
 	}
 
+	public float calculateMatch (ArrayList<String> stableStates, BooleanModel model)
+	{
+		float globaloutput = 0;
+
+		for (int i = 0; i < stableStates.size(); i++) {
+			for (int j = 0; j < modelOutputs.size(); j++) {
+				int indexStableState = model.getIndexOfEquation(modelOutputs
+						.get(j).getName());
+				if (indexStableState >= 0) {
+					int temp = Character.getNumericValue(stableStates
+							.get(i).charAt(indexStableState));
+					temp *= modelOutputs.get(j).getWeight();
+					globaloutput += temp;
+				}
+			}
+		}
+
+		globaloutput /= stableStates.size();
+		
+		return ((globaloutput - getMinOutput())/(getMaxOutput()-getMinOutput()+1)) ;
+	}
+	
+	public float getMaxOutput ()
+	{
+		float maxOutput = 0;
+		
+		for (int i = 0; i < modelOutputs.size(); i++)
+		{
+			maxOutput += Math.max(modelOutputs.get(i).getWeight(), 0) ;
+		}
+		
+		return maxOutput ;
+	}
+	
+	public float getMinOutput()
+	{
+		float minOutput = 0;
+		
+		for (int i = 0; i < modelOutputs.size(); i++)
+		{
+			minOutput += Math.min(modelOutputs.get(i).getWeight(), 0) ;
+		}
+		
+		return minOutput ;
+	}		
+	
+	
 	public static void saveModelOutputsFileTemplate(String filename)
 			throws IOException {
 		PrintWriter writer = new PrintWriter(filename, "UTF-8");
