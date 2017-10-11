@@ -202,6 +202,13 @@ public class Drabme implements Runnable {
 		// Run simulations and Analyzer
 		// ----------------------------
 
+		// Create temp directory
+		if (!new File (directoryTmp).mkdir())
+		{
+			System.out.println("Error creating temporary folder, exiting.") ;
+			return ;
+		}
+		
 		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel,
 				booleanModels, outputs, directoryTmp, logger);
 
@@ -209,6 +216,7 @@ public class Drabme implements Runnable {
 			dra.analyze();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
 
