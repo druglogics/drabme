@@ -31,7 +31,7 @@ public class ModelOutputs {
 		return modelOutputs.get(index);
 	}
 
-	public float calculateMatch (ArrayList<String> stableStates, BooleanModel model)
+	public float calculateGlobalOutput (ArrayList<String> stableStates, BooleanModel model)
 	{
 		float globaloutput = 0;
 
