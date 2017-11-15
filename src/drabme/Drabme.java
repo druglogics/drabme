@@ -91,6 +91,7 @@ public class Drabme implements Runnable {
 		}
 
 		// Date/time
+		DateFormat dateFormatFilename = new SimpleDateFormat("yyyyMMdd_HHmmss") ;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Calendar cal = Calendar.getInstance();
 		long starttime = System.nanoTime();
@@ -211,7 +212,7 @@ public class Drabme implements Runnable {
 		// Create temp directory
 		if (!preserveTmpFiles)
 		{
-			tempDir = new File(System.getProperty("java.io.tmpdir"), nameProject + "_" + appName + "_tmp") ;
+			tempDir = new File(System.getProperty("java.io.tmpdir"), nameProject + "_" + appName + "_" + dateFormatFilename.format(cal.getTime()) + "_tmp") ;
 			if (!tempDir.mkdir())
 			{
 				logger.error("Exiting. Couldn't create temp folder: " + tempDir.getAbsolutePath());

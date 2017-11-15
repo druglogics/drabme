@@ -26,8 +26,8 @@ public class Launcher {
 		
 			System.out.println("\nTestrun: setting up run with example files:");
 
-			args = new String[] {"ags_example", "toy_ags_network_toy_ags_steadystate/models", "toy_ags_drugs.tab", "toy_ags_modeloutputs.tab", "toy_ags_perturbations.tab", "example", "toy_ags_network_toy_ags_steadystate/tmp"} ;
-			System.out.println("drabme " + args[0] + " " + args[1] + " " + args[2] + " " +  args[3] + " " + args[4] + " " + args[5] + " " + args[6] + "\n\n")  ;
+			args = new String[] {"ags_example", "toy_ags_network_toy_ags_steadystate/models", "toy_ags_drugs.tab", "toy_ags_modeloutputs.tab", "toy_ags_perturbations.tab", "example", "true", "toy_ags_network_toy_ags_steadystate/tmp"} ;
+			System.out.println("drabme " + args[0] + " " + args[1] + " " + args[2] + " " +  args[3] + " " + args[4] + " " + args[5] + " " + args[6] + " " + args[7] + "\n\n")  ;
 			
 		}
 		
@@ -38,7 +38,8 @@ public class Launcher {
 		String filenameModelOutputs = args[3];
 		String filenameCombinations = args[4];
 		String directoryOutput = args[5] ;
-		String directoryTmp = args[6] ;
+		boolean preserveTmpFiles = Boolean.parseBoolean(args[6]) ;
+		String directoryTmp = args[7] ;
 
 		// make sure path to tmp directory is absolute, since BNreduction will be run from another working directory
 		if (!new File (directoryTmp).isAbsolute())
@@ -95,6 +96,7 @@ public class Launcher {
     							filenameModelOutputs, 
     							directoryOutput,
     							directoryTmp,
+    							preserveTmpFiles,
     							combosize));
     t.start();
     try {
