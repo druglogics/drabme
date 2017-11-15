@@ -29,7 +29,7 @@ import java.util.Calendar;
 public class Drabme implements Runnable {
 
 	public String appName = "Drabme";
-	public String version = "v0.11";
+	public String version = "v0.12";
 
 	private int verbosity;
 
