@@ -43,7 +43,7 @@ public class Drabme implements Runnable {
 	private String filenameModelOutputs;
 	private String directoryModels ;
 	private String directoryTmp ;
-	
+	private boolean preserveTmpFiles ;
 	private String directoryOutput ;
 	
 	private int combosize;
@@ -58,6 +58,7 @@ public class Drabme implements Runnable {
 			String filenameModelOutputs, 
 			String directoryOutput,
 			String directoryTmp,
+			boolean preserveTmpFiles,
 			int combosize) {
 
 		// Set variables
@@ -67,6 +68,7 @@ public class Drabme implements Runnable {
 		this.directoryModels = directoryModels ;
 		this.directoryOutput = directoryOutput ;
 		this.directoryTmp = directoryTmp ;
+		this.preserveTmpFiles = preserveTmpFiles ;
 		this.combosize = combosize;
 		this.verbosity = verbosity;
 
@@ -204,16 +206,30 @@ public class Drabme implements Runnable {
 		// Run simulations and Analyzer
 		// ----------------------------
 
-		// Create temp directory
-		if (!new File (directoryTmp).mkdir())
-		{
-			System.out.println("Error creating temporary folder, exiting.") ;
-			return ;
-		}
+		File tempDir ;
 		
+		// Create temp directory
+		if (!preserveTmpFiles)
+		{
+			tempDir = new File(System.getProperty("java.io.tmpdir"), nameProject + "_" + appName + "_tmp") ;
+			if (!tempDir.mkdir())
+			{
+				logger.error("Exiting. Couldn't create temp folder: " + tempDir.getAbsolutePath());
+				return ;
+			}
+		}
+		else
+		{
+			tempDir = new File (directoryTmp);
+			if (!tempDir.mkdir())
+			{
+				System.out.println("Error creating temporary folder, exiting.") ;
+				return ;
+			}
+		}		
 		
 		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel,
-				booleanModels, outputs, directoryTmp, logger);
+				booleanModels, outputs, tempDir.getAbsolutePath(), logger);
 
 		try {
 			dra.analyze();
@@ -332,6 +348,7 @@ public class Drabme implements Runnable {
 		
 	
 		
+		logger.outputHeader(1, "\nThe end");
 		
 		// -------------------
 		// Clean tmp directory
@@ -345,6 +362,12 @@ public class Drabme implements Runnable {
 		//logger.output(2, "Cleaning tmp directory...");
 		//cleanTmpDirectory(new File(directoryTmp));
 
+		if (!preserveTmpFiles)
+		{
+			logger.output(2, "Deleting temporary directory: " + tempDir.getAbsolutePath());
+			cleanTmpDirectory(tempDir);
+			tempDir.delete();
+		}
 
 		// -------
 		// The end
@@ -357,7 +380,6 @@ public class Drabme implements Runnable {
 		int minutes = (int) ((duration / 60) % 60);
 		int hours = (int) ((duration / (60 * 60)));
 
-		logger.outputHeader(1, "\nThe end");
 		logger.output(1, "End: " + dateFormat.format(cal.getTime()));
 		logger.output(1, "Analysis completed in " + hours + " hours, "
 				+ minutes + " minutes, and " + seconds + " seconds ");
