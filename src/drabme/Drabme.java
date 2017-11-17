@@ -103,7 +103,7 @@ public class Drabme implements Runnable {
 		logger.outputHeader(1, "Project: " + nameProject);
 
 
-		logger.setDebug(true);
+		logger.setDebug(false);
 		logger.debug("DEBUG MODE");
 		// ---------------
 		// Load all models
@@ -297,8 +297,20 @@ public class Drabme implements Runnable {
 								+ perturbation.getSynergyPredictions() + "\t"
 								+ perturbation.getNonSynergyPredictions());
 			}
+			
+			// if synergies + non-synergies for one combination exceeds number of models then there is an error
+			// in storing synergies, previously happened due to bug in hash generation for drugs
+			if ((perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions())>booleanModels.size())
+			{
+				logger.error("Synergy and non-synergy count error: " + perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions());
+				return ;
+			}
 		}
 
+		// ----------------------------------
+		// Check for errors in synergy counts
+		// ----------------------------------
+		
 		
 
 		// ----------
