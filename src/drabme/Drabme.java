@@ -103,6 +103,8 @@ public class Drabme implements Runnable {
 		logger.outputHeader(1, "Project: " + nameProject);
 
 
+		logger.setDebug(true);
+		logger.debug("DEBUG MODE");
 		// ---------------
 		// Load all models
 		// ---------------

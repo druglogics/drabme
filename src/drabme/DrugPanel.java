@@ -355,6 +355,11 @@ public class DrugPanel {
 
 		for (int i = 0; i < drugs.length; i++) {
 			hash += drugs[i].getName().hashCode();
+			
+			for (int j = 0; j < drugs[i].getTargets().size(); j++)
+			{
+				hash += drugs[i].getTargets().get(j).hashCode();
+			}
 		}
 
 		return hash;

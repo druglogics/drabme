@@ -103,13 +103,32 @@ public class ResponseModel {
 	public boolean isCombinationSynergistic(Drug[] combination) {
 		boolean value = false;
 
+		if (combination.length == 2)
+			logger.debug("\nCombination: " + combination[0].getName() + combination[1].getName());
+		
+		logger.debug("DrugHash:" + DrugPanel.getDrugSetHash(combination));
+		
 		PerturbationModel combinationresponse = perturbationModels
 				.get(getIndexOfPerturbationModel(combination));
 		Perturbation perturbation = combinationresponse.getPerturbation();
 
+		int index = getIndexOfPerturbationModel(combination);
+		logger.debug ("Filename: " + combinationresponse.getFilename());
+		
 		Drug[][] subsets = DrugPanel.getCombinationSubsets(combination);
 
-		boolean computable = true;
+		for (int i = 0; i < subsets.length; i++)
+		{
+			String combo = "";
+			for (int j = 0; j < subsets[i].length; j++)
+			{
+				combo += subsets[i][j].getName() + "-";
+			}
+			logger.debug("Combination subsets:" + combo);
+		}		
+
+		
+			boolean computable = true;
 
 		// Check if model for combination and all subsets have stable state(s)
 		if (!combinationresponse.hasGlobalOutput())
@@ -134,6 +153,8 @@ public class ResponseModel {
 								.getGlobalOutput());
 
 			if (combinationresponse.getGlobalOutput() < minimumGlobalOutput) {
+				 
+				
 				perturbation.addSynergyPrediction();
 				value = true;
 				String namecombo = "";
