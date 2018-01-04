@@ -1,12 +1,14 @@
 package drabme;
 
 import gitsbe.Logger;
+import gitsbe.ModelOutputs;
+import gitsbe.Timer;
 import gitsbe.BooleanModel;
 
-import java.io.BufferedReader;
+import static gitsbe.Util.*;
+
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -22,239 +24,212 @@ import java.util.Calendar;
  * A. Veliz-Cuba, B. Aguilar, F. Hinkelmann and R. Laubenbacher. Steady state analysis of Boolean molecular network models via model reduction and computational algebra. BMC Bioinformatics, 2014.
  * 
  * 
- * Several levels of drug response can be computed if several outputs (>1) is defined, i.e. 2 outputs prosurvival, 3 outputs antisurvival = 6 levels of survival signaling (2,1,0,-1,-2,-3)
- * Designate effect of a node by sign and number in square brackes. Example: "[+2] Node1 * = Node2 and not Node3" gives output of +2 when Node1 is ON. "[-1] Node4 = Node5" gives output -1 when Node4 is ON. 
- * 
  */
 public class Drabme implements Runnable {
 
-	public String appName = "Drabme";
-	public String version = "v0.12";
+	public static String appName = "Drabme";
+	public String version = "v0.13";
 
 	private int verbosity;
 
-	// inputs
-//	private String filenameModelsIndex;
-	
-	String nameProject ;
+	String nameProject;
 
 	private String filenameDrugs;
 	private String filenameCombinations;
 	private String filenameModelOutputs;
-	private String directoryModels ;
-	private String directoryTmp ;
-	private boolean preserveTmpFiles ;
-	private String directoryOutput ;
-	
+	private String directoryModels;
+	private String directoryTmp;
+	private String directoryOutput;
+	private boolean preserveTmpFiles;
+
 	private int combosize;
 
-	private Logger logger ;
-	
-	public Drabme(int verbosity, 
-			String nameProject,
-			String directoryModels,
-			String filenameDrugs, 
-			String filenameCombinations,
-			String filenameModelOutputs, 
-			String directoryOutput,
-			String directoryTmp,
-			boolean preserveTmpFiles,
-			int combosize) {
+	private Logger logger;
+
+	public Drabme(int verbosity, String nameProject, String directoryModels, String filenameDrugs,
+			String filenameCombinations, String filenameModelOutputs, String directoryOutput, String directoryTmp,
+			boolean preserveTmpFiles, int combosize) {
 
 		// Set variables
-		this.nameProject = nameProject ;
+		this.nameProject = nameProject;
 		this.filenameDrugs = filenameDrugs;
 		this.filenameModelOutputs = filenameModelOutputs;
-		this.directoryModels = directoryModels ;
-		this.directoryOutput = directoryOutput ;
-		this.directoryTmp = directoryTmp ;
-		this.preserveTmpFiles = preserveTmpFiles ;
+		this.directoryModels = directoryModels;
+		this.directoryOutput = directoryOutput;
+		this.directoryTmp = directoryTmp;
+		this.preserveTmpFiles = preserveTmpFiles;
 		this.combosize = combosize;
 		this.verbosity = verbosity;
 
 		if (filenameCombinations.length() > 0)
 			this.filenameCombinations = filenameCombinations;
-
 	}
-
-
 
 	@Override
 	public void run() {
+
+		System.out.print("Welcome to " + appName + " " + version + "\n\n");
+
 		// Initialize logger
+		String logDirectory = new File(directoryOutput, "log").getAbsolutePath();
+		initializeDrabmeLogger(logDirectory);
 
-		try {
-			logger = new Logger (appName + "_" + nameProject + "_log.txt", nameProject + "_summary.txt", directoryOutput, verbosity, true);
-		} catch (IOException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
-		}
+		// Start timer
+		Timer timer = new Timer();
 
-		// Date/time
-		DateFormat dateFormatFilename = new SimpleDateFormat("yyyyMMdd_HHmmss") ;
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Calendar cal = Calendar.getInstance();
-		long starttime = System.nanoTime();
-
-		// Output header
-		logger.outputHeader(1, this.appName + " " + this.version);
-		logger.output(1, "Analysis start: " + dateFormat.format(cal.getTime()));
-		
-		logger.outputHeader(1, "Project: " + nameProject);
-
-
-		logger.setDebug(false);
-		logger.debug("DEBUG MODE");
-		// ---------------
-		// Load all models
-		// ---------------
-		
-		
-				
-		logger.outputHeader(2, "Loading Boolean models");
-
+		// Load boolean models
 		ArrayList<BooleanModel> booleanModels = new ArrayList<BooleanModel>();
+		loadModels(booleanModels);
 
-		try {
-			//this.loadBooleanModels(filenameBooleanModels, "", booleanModels);
-			this.loadBooleanModels(directoryModels, booleanModels);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		// ----------
 		// Load drugs
-		// ----------
+		DrugPanel drugPanel = loadDrugPanel(booleanModels);
 
-		logger.outputHeader(2, "Loading drug panel");
+		// Load perturbation panel
+		PerturbationPanel perturbationPanel = loadPerturbationPanel(drugPanel);
 
-		DrugPanel drugPanel;
-
-		try {
-			drugPanel = new DrugPanel(filenameDrugs, logger);
-
-			// Create drug combinations based on combosize
-			// drugPanel.createCombinations(combosize);
-
-		} catch (IOException e) {
-
-			logger.output(1, "ERROR: Couldn't load drugs file: "
-					+ filenameDrugs);
-			logger.output(1, "Writing template drugs file: " + filenameDrugs);
-
-			try {
-				DrugPanel.saveDrugPanelFileTemplate(filenameDrugs);
-			} catch (IOException e2) {
-				logger.output(1, "ERROR: Couldn't write template drugs file.");
-				e2.printStackTrace();
-			}
-
-			e.printStackTrace();
-			return;
-		}
-
-		// ---------------------------------------------------------------------
-		// Define perturbations based on drugs and drug combinations (drugpanel)
-		// ---------------------------------------------------------------------
-
-		logger.outputHeader(2, "Defining perturbations");
-
-		Drug[][] drugperturbations = null;
-
-		if (filenameCombinations == null) {
-			drugperturbations = drugPanel.getCombinations(combosize);
-		} else {
-			try {
-				drugperturbations = drugPanel.loadCombinationsFromFile(filenameCombinations);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
-		// PerturbationPanel perturbationPanel = new PerturbationPanel
-		// (drugPanel.getCombinations(combosize), drugPanel) ;
-		PerturbationPanel perturbationPanel = new PerturbationPanel(
-				drugperturbations, drugPanel, logger);
-
-		// -------------------
 		// Load output weights
-		// -------------------
-		logger.outputHeader(2, "Loading model outputs");
-		ModelOutputs outputs;
+		ModelOutputs outputs = loadModelOutputs(booleanModels);
 
-		try {
-			outputs = new ModelOutputs(filenameModelOutputs, logger);
-		} catch (IOException e) {
-
-			logger.output(1, "ERROR: Couldn't load model outputs file: "
-					+ filenameModelOutputs);
-			logger.output(1, "Writing template model outputs file: "
-					+ filenameModelOutputs);
-
-			try {
-				ModelOutputs.saveModelOutputsFileTemplate(filenameModelOutputs);
-			} catch (IOException e2) {
-				logger.output(1,
-						"ERROR: Couldn't write template model outputs file.");
-				e2.printStackTrace();
-			}
-
-			e.printStackTrace();
-			return;
-		}
-
-		// ----------------------------
-		// Run simulations and Analyzer
-		// ----------------------------
-
-		File tempDir ;
-		
 		// Create temp directory
-		if (!preserveTmpFiles)
-		{
-			tempDir = new File(System.getProperty("java.io.tmpdir"), nameProject + "_" + appName + "_" + dateFormatFilename.format(cal.getTime()) + "_tmp") ;
-			if (!tempDir.mkdir())
-			{
-				logger.error("Exiting. Couldn't create temp folder: " + tempDir.getAbsolutePath());
-				return ;
-			}
-		}
-		else
-		{
-			tempDir = new File (directoryTmp);
-			if (!tempDir.mkdir())
-			{
-				System.out.println("Error creating temporary folder, exiting.") ;
-				return ;
-			}
-		}		
-		
-		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel,
-				booleanModels, outputs, tempDir.getAbsolutePath(), logger);
+		File tempDir = new File(directoryTmp);
+		if (!createDirectory(directoryTmp, logger))
+			return;
 
+		// Run simulations and compute Statistics
+		runDrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, logDirectory);
+
+		// Generate Summary Reports for Drabme
+		generateModelWiseResponses(perturbationPanel);
+		generateModelWiseSynergies(perturbationPanel, booleanModels);
+		generateEnsembleWiseResponses(perturbationPanel);
+		generateEnsembleWiseSynergies(perturbationPanel);
+
+		// Clean tmp directory
+		cleanTmpDirectory(tempDir);
+
+		// Stop timer
+		timer.stopTimer();
+		logger.outputHeader(1, "\nThe end");
+
+		closeLogger(timer);
+	}
+
+	private void runDrugResponseAnalyzer(PerturbationPanel perturbationPanel, ArrayList<BooleanModel> booleanModels,
+			ModelOutputs outputs, String logDirectory) {
+
+		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, directoryTmp,
+				logger, logDirectory);
+		dra.analyze();
+		mergeLogFiles(dra, logDirectory);
+		dra.computeStatistics();
+	}
+
+	/**
+	 * Merges all Drabme simulation logging files into one
+	 */
+	public void mergeLogFiles(DrugResponseAnalyzer dra, String logDirectory) {
+		String mergedLogFilename = new File(logDirectory, "Drabme_simulations_log.txt").getAbsolutePath();
 		try {
-			dra.analyze();
+			mergeFiles(dra.simulationFileList, mergedLogFilename);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
 
-		// ----------------
-		// Generate summary
-		// ----------------
+	/**
+	 * Get the 'extra' effect of combinations vs drug subset that has the strongest
+	 * response i.e. pairwise combination: PD-PI vs min(PD, PI) i.e. threeway
+	 * combination: PD-PI-5Z vs min(PD-PI, PD-5Z, PI-5Z)
+	 * 
+	 * @param perturbationPanel
+	 */
+	private void generateEnsembleWiseSynergies(PerturbationPanel perturbationPanel) {
+		// File to store excess effects over agerage responses in
+		String filename = new File(directoryOutput, "output_" + nameProject + "_ensemblewise_synergies.tab")
+				.getAbsolutePath();
 
-		String filename ;
-		
-		// File to store perturbation responses in, separately
-		filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_responses.tab").getAbsolutePath() ; 
-		
+		logger.outputHeader(1, "Combinatorial response in excess over subsets (ensemble-wise synergy)");
+		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Response excess over subset");
+
+		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
+			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
+
+			if (perturbation.getDrugs().length >= 2) {
+				logger.outputStringMessageToFile(filename, perturbation.getName() + "\t"
+						+ perturbationPanel.getPredictedAverageCombinationResponse(perturbation));
+			}
+		}
+	}
+
+	/**
+	 * The average predicted responses for each perturbation
+	 * 
+	 * @param perturbationPanel
+	 */
+	private void generateEnsembleWiseResponses(PerturbationPanel perturbationPanel) {
+		// File to store average responses in
+		String filename = new File(directoryOutput, "output_" + nameProject + "_ensemblewise_responses.tab")
+				.getAbsolutePath();
+
+		logger.outputHeader(1, "Ensemble average responses");
+		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Ensemble average response");
+
+		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
+			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
+
+			logger.outputStringMessageToFile(filename,
+					perturbation.getName() + "\t" + perturbation.getAveragePredictedResponse());
+		}
+	}
+
+	/**
+	 * Synergies vs non-synergies for each perturbation
+	 * 
+	 * @param perturbationPanel
+	 * @param booleanModels
+	 */
+	private void generateModelWiseSynergies(PerturbationPanel perturbationPanel,
+			ArrayList<BooleanModel> booleanModels) {
+		// File to store drug synergies in
+		String filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_synergies.tab")
+				.getAbsolutePath();
+
+		logger.outputHeader(1, "Synergies vs Non-synergies per perturbation");
+		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Synergies" + "\t" + "Non-synergies");
+
+		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
+			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
+
+			if (perturbation.getDrugs().length >= 2) {
+				logger.outputStringMessageToFile(filename, perturbation.getName() + "\t"
+						+ perturbation.getSynergyPredictions() + "\t" + perturbation.getNonSynergyPredictions());
+			}
+
+			// if synergies + non-synergies for one combination exceeds number of models
+			// then there is an error
+			// in storing synergies, previously happened due to bug in hash generation for
+			// drugs
+			if ((perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions()) > booleanModels
+					.size()) {
+				logger.outputStringMessage(1, "ERROR: Synergy and non-synergy count error: "
+						+ perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions());
+				System.exit(1);
+			}
+		}
+	}
+
+	/**
+	 * Predicted responses for every model for each perturbation
+	 * 
+	 * @param perturbationPanel
+	 */
+	private void generateModelWiseResponses(PerturbationPanel perturbationPanel) {
+		// File to store perturbation responses
+		String filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_responses.tab")
+				.getAbsolutePath();
+
 		logger.outputHeader(1, "Drug perturbation responses");
-		logger.output(
-				filename,
-				"Perturbation" + "\t" + "Average" + "\t" + "SD" + "\t"
-				+ "Data");
+		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Average" + "\t" + "SD" + "\t" + "Data");
 
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
@@ -265,197 +240,136 @@ public class Drabme implements Runnable {
 				individualresponses += "\t" + perturbation.getPredictions()[j];
 			}
 
-			logger.output(
-					filename,
-					perturbation.getName()
-							+ "\t"
-							+ perturbation.getAveragePredictedResponse()
-							+ "\t"
-							+ perturbation
-									.getStandardDeviationPredictedResponse()
-							+ individualresponses);
+			logger.outputStringMessageToFile(filename,
+					perturbation.getName() + "\t" + perturbation.getAveragePredictedResponse() + "\t"
+							+ perturbation.getStandardDeviationPredictedResponse() + individualresponses);
 		}
 
-		// --------------------------
-		// Synergies vs non-synergies
-		// --------------------------
+	}
 
-		// File to store drug synergies in
-		filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_synergies.tab").getAbsolutePath() ;
-		
-		logger.outputHeader(1, "Combinatorial response in excess over subsets, model-wise");
-		logger.output(filename, "Perturbation" + "\t" + "Synergies" + "\t"
-				+ "Non-synergies");
+	private PerturbationPanel loadPerturbationPanel(DrugPanel drugPanel) {
+		logger.outputHeader(2, "Defining perturbations");
 
-		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
-			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
+		Drug[][] drugperturbations = null;
 
-			if (perturbation.getDrugs().length >= 2) {
-				logger.output(
-						filename,
-						perturbation.getName() + "\t"
-								+ perturbation.getSynergyPredictions() + "\t"
-								+ perturbation.getNonSynergyPredictions());
-			}
-			
-			// if synergies + non-synergies for one combination exceeds number of models then there is an error
-			// in storing synergies, previously happened due to bug in hash generation for drugs
-			if ((perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions())>booleanModels.size())
-			{
-				logger.error("Synergy and non-synergy count error: " + perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions());
-				return ;
+		if (filenameCombinations == null) {
+			drugperturbations = drugPanel.getCombinations(combosize);
+		} else {
+			try {
+				drugperturbations = drugPanel.loadCombinationsFromFile(filenameCombinations);
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 
-		// ----------------------------------
-		// Check for errors in synergy counts
-		// ----------------------------------
-		
-		
+		PerturbationPanel perturbationPanel = new PerturbationPanel(drugperturbations, logger);
+		return perturbationPanel;
+	}
 
-		// ----------
-		// Statistics
-		// ----------
-
-		// File to store average responses in
-		filename = new File (directoryOutput, "output_" + nameProject + "_ensemblewise_responses.tab").getAbsolutePath() ;
-		
-		logger.outputHeader(1, "Statistics");
-
-		StatisticalAnalysis sa = new StatisticalAnalysis(perturbationPanel);
-
-		logger.outputHeader(1, "Ensemble average responses");
-		
-		logger.output(filename, "Perturbation" + "\t" + "Ensemble average response");
-			
-		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
-			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
-
-			logger.output(
-					filename,
-					perturbation.getName() + "\t"
-							+ perturbation.getAveragePredictedResponse());
-		}
-
-		// Get the 'extra' effect of combinations vs drug subset that has the strongest response
-		// i.e. pairwise combination: PD-PI vs min(PD, PI)
-		// i.e. threeway combination: PD-PI-5Z vs min(PD-PI, PD-5Z, PI-5Z)
-		
-		
-		// File to store excess effects over agerage responses in
-		filename = new File (directoryOutput, "output_" + nameProject + "_ensemblewise_synergies.tab").getAbsolutePath() ;
-		
-		logger.outputHeader(1, "Combinatorial response in excess over subsets (ensemble-wise synergy)");
-		
-		logger.output(filename, "Perturbation" + "\t" + "Response excess over subset");
-		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
-			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
-
-			if (perturbation.getDrugs().length >= 2) {
-				logger.output(
-						filename,
-						perturbation.getName()
-								+ "\t"
-								+ perturbationPanel
-										.getPredictedAverageCombinationResponse(perturbation));
+	private DrugPanel loadDrugPanel(ArrayList<BooleanModel> booleanModels) {
+		logger.outputHeader(2, "Loading drug panel");
+		DrugPanel drugPanel = null;
+		try {
+			drugPanel = new DrugPanel(filenameDrugs, logger);
+		} catch (IOException e) {
+			e.printStackTrace();
+			File file = new File(directoryOutput);
+			filenameDrugs = file.getParent() + "/" + "drugpanel.tab";
+			logger.outputStringMessage(1, "Cannot find drugpanel file, generating template file: " + filenameDrugs);
+			try {
+				DrugPanel.writeDrugPanelFileTemplate(filenameDrugs);
+				drugPanel = new DrugPanel(filenameDrugs, logger);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				System.exit(1);
 			}
 		}
-		
-	
-		
-		logger.outputHeader(1, "\nThe end");
-		
-		// -------------------
-		// Clean tmp directory
-		// -------------------
-		
-		//String filenameArchive = new File(directoryOutput, nameProject + ".drabme.tmp.tar.gz").getAbsolutePath() ;
-		//
-		//logger.output(2, "\nCreating archive with all temporary files: " + filenameArchive);
-		//compressDirectory (filenameArchive, directoryTmp) ;
-		//
-		//logger.output(2, "Cleaning tmp directory...");
-		//cleanTmpDirectory(new File(directoryTmp));
 
-		if (!preserveTmpFiles)
-		{
-			logger.output(2, "Deleting temporary directory: " + tempDir.getAbsolutePath());
-			cleanTmpDirectory(tempDir);
+		drugPanel.checkDrugTargets(booleanModels);
+
+		return drugPanel;
+	}
+
+	private void loadModels(ArrayList<BooleanModel> booleanModels) {
+		logger.outputHeader(2, "Loading Boolean models");
+
+		try {
+			this.loadBooleanModels(directoryModels, booleanModels);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	private ModelOutputs loadModelOutputs(ArrayList<BooleanModel> booleanModels) {
+		ModelOutputs outputs = null;
+		try {
+			outputs = new ModelOutputs(filenameModelOutputs, logger);
+		} catch (IOException e) {
+			e.printStackTrace();
+			File file = new File(directoryOutput);
+			filenameModelOutputs = file.getParent() + "/" + "modeloutputs.tab";
+			logger.outputStringMessage(1,
+					"Couldn't load model outputs file, generating template file: " + filenameModelOutputs);
+			try {
+				ModelOutputs.saveModelOutputsFileTemplate(filenameModelOutputs);
+				outputs = new ModelOutputs(filenameModelOutputs, logger);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				System.exit(1);
+			}
+		}
+
+		logger.outputHeader(1, "Model Outputs");
+		logger.outputLines(1, outputs.getModelOutputs());
+
+		outputs.checkModelOutputNodeNames(booleanModels.get(0));
+
+		return outputs;
+	}
+
+	private void cleanTmpDirectory(File tempDir) {
+		if (!preserveTmpFiles) {
+			logger.outputStringMessage(2, "\n" + "Deleting temporary directory: " + tempDir.getAbsolutePath());
+			deleteFilesFromDirectory(tempDir);
 			tempDir.delete();
 		}
-
-		// -------
-		// The end
-		// -------
-		long endtime = System.nanoTime();
-
-		long duration = (endtime - starttime) / 1000000000;
-
-		int seconds = (int) (duration) % 60;
-		int minutes = (int) ((duration / 60) % 60);
-		int hours = (int) ((duration / (60 * 60)));
-
-		logger.output(1, "End: " + dateFormat.format(cal.getTime()));
-		logger.output(1, "Analysis completed in " + hours + " hours, "
-				+ minutes + " minutes, and " + seconds + " seconds ");
-
-		logger.output(1, "\nWith that we say thank you and good bye!");
 	}
 
-	private void cleanTmpDirectory (File dir)
-	{
-	    for (File file: dir.listFiles()) {
-	        if (file.isDirectory()) cleanTmpDirectory(file);
-	        file.delete();
-	    }
+	private void closeLogger(Timer timer) {
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Calendar calendarData = Calendar.getInstance();
+		logger.outputStringMessage(1, "End: " + dateFormat.format(calendarData.getTime()));
+		logger.outputStringMessage(1, "Analysis completed in " + timer.getHoursOfDuration() + " hours, "
+				+ timer.getMinutesOfDuration() + " minutes, and " + timer.getSecondsOfDuration() + " seconds ");
+		logger.outputStringMessage(1, "\nWith that we say thank you and good bye!");
+		logger.finish();
 	}
-
 
 	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) throws IOException {
 
-	    File[] files = new File(directory).listFiles();
-		
-	    for (int i = 0; i < files.length; i++) {
-	    File f = files[i];
-	      
-		booleanModels.add(new BooleanModel(f.getPath(), logger));
+		File[] files = new File(directory).listFiles();
+		File file;
+
+		for (int i = 0; i < files.length; i++) {
+			if (files[i].getAbsolutePath().toLowerCase().contains("gitsbe")) {
+				file = files[i];
+				booleanModels.add(new BooleanModel(file.getPath(), logger));
+			}
 		}
 	}
-	private void compressDirectory (String filenameArchive, String directory)
-	{
-		//tar cvfz tmp.tar.gz tmp
 
+	private void initializeDrabmeLogger(String directory) {
 		try {
-			ProcessBuilder pb = new ProcessBuilder("tar", "cvfz", filenameArchive, "-C", new File(directory).getParent(), new File(directory).getName());
-			
-			if (logger.getVerbosity() >= 3)
-			{
-				pb.redirectErrorStream(true);
-				pb.redirectOutput() ;
-			}
-			
-			logger.output(3, "Compressing temporary models: " + filenameArchive) ;
-			
-			
-			Process p ;
-			p = pb.start ();
-			
-			try {
-				p.waitFor() ;
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while(r.ready()) {
-	        	logger.output(3, r.readLine());
-            }
-		
+			String filenameOutput = appName + "_" + nameProject + "_log.txt";
+			logger = new Logger(filenameOutput, directory, verbosity, true);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.exit(1);
 		}
+
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Calendar calendarData = Calendar.getInstance();
+		logger.outputHeader(1, appName + " " + version);
+		logger.outputStringMessage(1, "Start: " + dateFormat.format(calendarData.getTime()));
 	}
 }

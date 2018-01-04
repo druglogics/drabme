@@ -8,27 +8,23 @@ import gitsbe.Logger;
 public class Perturbation {
 
 	private Drug[] drugs;
-
 	private int perturbationHash;
-
-	private double observedResponse;
-
 	private ArrayList<Integer> predictedResponses;
 
 	private int predictedSynergies;
 	private int predictedNonSynergies;
 
-	private double mean;
-	private double sd;
-	private double var;
+	public double mean;
+	public double sd;
+	public double var;
 
 	private boolean isStatisticsCalculated = false;
 
-	private Logger logger ;
-	
+	protected Logger logger;
+
 	public Perturbation(Drug[] perturbation, Logger logger) {
 
-		this.logger = logger ;
+		this.logger = logger;
 		drugs = perturbation;
 		predictedResponses = new ArrayList<Integer>();
 
@@ -36,33 +32,33 @@ public class Perturbation {
 		predictedNonSynergies = 0;
 
 		// Report if any drugs passed are without defined targets
-		for (int i = 0; i < perturbation.length; i++) {
+		for (int i = 0; i < drugs.length; i++) {
 			if (drugs[i].getTargets().size() == 0) {
-				logger.output(2, "Added drug " + drugs[i].getName()
-						+ " which has no targets to perturbations");
+				logger.outputStringMessage(2,
+						"Added drug " + drugs[i].getName() + " which has no targets to perturbations");
 			}
 		}
 
 		perturbationHash = DrugPanel.getDrugSetHash(drugs);
 	}
 
-	public void addSynergyPrediction() {
+	synchronized public void addSynergyPrediction() {
 		predictedSynergies++;
+	}
+
+	synchronized public void addNonSynergyPrediction() {
+		predictedNonSynergies++;
 	}
 
 	public int getSynergyPredictions() {
 		return predictedSynergies;
 	}
 
-	public void addNonSynergyPrediction() {
-		predictedNonSynergies++;
-	}
-
 	public int getNonSynergyPredictions() {
 		return predictedNonSynergies;
 	}
 
-	public void addPrediction(int response) {
+	synchronized public void addPrediction(int response) {
 		predictedResponses.add(response);
 	}
 
@@ -71,10 +67,6 @@ public class Perturbation {
 	}
 
 	public void calculateStatistics() {
-		isStatisticsCalculated = true;
-
-		String responseString = "";
-
 		int responseSum = 0;
 		int numPredictions = predictedResponses.size();
 
@@ -94,37 +86,29 @@ public class Perturbation {
 					int prediction = predictedResponses.get(i);
 					var += (prediction - mean) * (prediction - mean);
 				}
-
-				sd = Math.sqrt(var);
-				sd /= (numPredictions - 1);
+				sd = Math.sqrt(var / (numPredictions - 1));
 			}
 		}
 
 		this.mean = mean;
 		this.var = var;
 		this.sd = sd;
+
+		isStatisticsCalculated = true;
+		logger.outputStringMessage(0,
+				"Statistics calculated for perturbation: " + PerturbationPanel.getCombinationName(drugs));
 	}
 
 	public double getAveragePredictedResponse() {
 		if (!isStatisticsCalculated)
 			calculateStatistics();
-
 		return mean;
 	}
 
 	public double getStandardDeviationPredictedResponse() {
 		if (!isStatisticsCalculated)
 			calculateStatistics();
-
 		return sd;
-	}
-
-	public double getObservedResponse() {
-		return observedResponse;
-	}
-
-	public void addObservation(double response) {
-		this.observedResponse = response;
 	}
 
 	/**
@@ -132,6 +116,14 @@ public class Perturbation {
 	 */
 	public Drug[] getDrugs() {
 		return drugs;
+	}
+
+	public String getDrugsVerbose() {
+		String result = "";
+		for (int i = 0; i < drugs.length; i++) {
+			result += drugs[i].getName() + " ";
+		}
+		return result;
 	}
 
 	public String getName() {
@@ -142,20 +134,26 @@ public class Perturbation {
 		return perturbationHash;
 	}
 
+	/**
+	 * Converts an ArrayList of Integers to an Array of int
+	 * 
+	 * @param integers
+	 * @return
+	 */
 	public static int[] convertIntegers(ArrayList<Integer> integers) {
-		int[] ret = new int[integers.size()];
+		int[] result = new int[integers.size()];
 		Iterator<Integer> iterator = integers.iterator();
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = iterator.next().intValue();
+		for (int i = 0; i < result.length; i++) {
+			result[i] = iterator.next().intValue();
 		}
-		return ret;
+		return result;
 	}
 
 	public static double[] convertDoubles(Double[] doubles) {
-		double[] ret = new double[doubles.length];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = doubles[i].doubleValue();
+		double[] result = new double[doubles.length];
+		for (int i = 0; i < result.length; i++) {
+			result[i] = doubles[i].doubleValue();
 		}
-		return ret;
+		return result;
 	}
 }

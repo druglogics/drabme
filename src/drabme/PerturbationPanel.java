@@ -2,112 +2,31 @@ package drabme;
 
 import gitsbe.Logger;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import static java.lang.Math.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class PerturbationPanel {
 
-	Perturbation[] perturbations;
-	DrugPanel drugPanel;
-	Logger logger ;
+	private Perturbation[] perturbations;
+	private Logger logger;
 
-	public PerturbationPanel(Drug[][] perturbations, DrugPanel drugPanel, Logger logger) {
-
-		this.logger = logger ;
-		
-		this.drugPanel = drugPanel;
+	public PerturbationPanel(Drug[][] perturbations, Logger logger) {
+		this.logger = logger;
 		this.perturbations = new Perturbation[perturbations.length];
 
 		for (int i = 0; i < perturbations.length; i++) {
 			this.perturbations[i] = new Perturbation(perturbations[i], logger);
 		}
 
-		logger.output(2, this.getCombinationNames(perturbations));
+		logger.outputLines(2, this.getCombinationNames(perturbations));
 	}
 
 	/**
-	 * Load experimentally observed data, used for statistical analysis of
-	 * predictions
+	 * Returns the index of the perturbation that has the specific drugs combination
 	 * 
-	 * @param filename
-	 * @throws FileNotFoundException
-	 * @throws IOException
+	 * @param drugs
+	 * @return
 	 */
-	public void loadObservationData(String filename) throws IOException {
-		ArrayList<String> lines = new ArrayList<String>();
-
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-
-		try {
-			while (true) {
-				String line = reader.readLine();
-
-				// no more lines to read
-				if (line == null) {
-					reader.close();
-					break;
-				}
-
-				if (!line.startsWith("#")) {
-					lines.add(line);
-				}
-			}
-		}
-
-		finally {
-			reader.close();
-		}
-
-		for (int i = 0; i < lines.size(); i++) {
-			String[] splitline = lines.get(i).split("\t");
-			double response = Double.parseDouble(splitline[0]);
-
-			Drug[] drugs = new Drug[splitline.length - 1];
-
-			if (drugPanel.areDrugsInPanel(Arrays.copyOfRange(splitline, 1,
-					splitline.length))) {
-				for (int j = 1; j < splitline.length; j++) {
-					try {
-						drugs[j - 1] = drugPanel.getDrug(splitline[j]);
-					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-
-				int index = this.getIndexOfPerturbation(drugs);
-
-				if (index >= 0) {
-					logger.output(2, "Observation for drug combination "
-							+ PerturbationPanel.getCombinationName(drugs)
-							+ ", observed data: " + response);
-					perturbations[index].addObservation(response);
-				} else {
-					logger.output(
-							2,
-							"Observation file contains observations on drug combination "
-									+ PerturbationPanel
-											.getCombinationName(drugs)
-									+ ", but this combination is not simulated, even though single drugs are part of drug panel used for simulations.");
-				}
-
-			} else {
-				logger.output(
-						2,
-						"Observation file contains observations on drug combination not in drugpanel: "
-								+ PerturbationPanel.getCombinationName(Arrays
-										.copyOfRange(splitline, 1,
-												splitline.length)));
-			}
-		}
-	}
-
 	private int getIndexOfPerturbation(Drug[] drugs) {
 		int index = -1;
 
@@ -116,24 +35,15 @@ public class PerturbationPanel {
 
 		hashA = DrugPanel.getDrugSetHash(drugs);
 
-		// Go through perturbation list to find condition matching parameter
-		// 'drugs'
-
+		// Go through perturbation list to find condition matching parameter 'drugs'
 		for (int i = 0; i < perturbations.length; i++) {
-			hashB = DrugPanel.getDrugSetHash(perturbations[i].getDrugs());
-			// h ashB = perturbations[i].getPerturbationHash() ;
-			// getDrugSetHash(perturbations.get(i)) ;
-
+			hashB = perturbations[i].getPerturbationHash();
 			if (hashA == hashB) {
 				return i;
 			}
 		}
 
 		return index;
-	}
-
-	private int getIndexOfPerturbation(Perturbation perturbation) {
-		return getIndexOfPerturbation(perturbation.getDrugs());
 	}
 
 	/**
@@ -143,6 +53,13 @@ public class PerturbationPanel {
 		return perturbations;
 	}
 
+	/**
+	 * Returns an array of perturbations that have specific number of drugs
+	 * (combinationsize)
+	 * 
+	 * @param size
+	 * @return
+	 */
 	public Perturbation[] getPerturbations(int combinationsize) {
 		ArrayList<Perturbation> result = new ArrayList<Perturbation>();
 
@@ -159,6 +76,13 @@ public class PerturbationPanel {
 		return perturbations.length;
 	}
 
+	/**
+	 * Returns the number of perturbations that have a specific number of drugs
+	 * (size)
+	 * 
+	 * @param size
+	 * @return
+	 */
 	public int getNumberOfPerturbations(int size) {
 		int result = 0;
 
@@ -171,66 +95,18 @@ public class PerturbationPanel {
 		return result;
 	}
 
-	public static void writeObservationsTemplateFile(
-			Perturbation[] perturbations, String filename)
-			throws FileNotFoundException, UnsupportedEncodingException {
-		PrintWriter writer = new PrintWriter(filename, "UTF-8");
-
-		// Write header with '#'
-		writer.println("# Experimentally observed CI values");
-		writer.println("# Use tab-separated columns");
-		writer.println("#");
-		writer.println("# In template file all drug combinations are given a CI of 1.0, these must be changed to observed CIs");
-		writer.println("#");
-		writer.println("# CI\tDrug1\tDrug2");
-
-		for (int i = 0; i < perturbations.length; i++) {
-			if (perturbations[i].getDrugs().length == 2) {
-				String line = "1.0";
-
-				for (int j = 0; j < perturbations[i].getDrugs().length; j++) {
-					line += "\t" + perturbations[i].getDrugs()[j].getName();
-				}
-				writer.println(line);
-			}
-		}
-
-		writer.close();
-	}
-
-	public static String getCombinationName(String[] combination) {
-		String namecombo = "[";
-		for (int i = 0; i < combination.length; i++) {
-			if (i > 0)
-				namecombo += "]-[";
-
-			namecombo += combination[i];
-		}
-		namecombo += "]";
-
-		return namecombo;
-	}
-
-	public double getPredictedAverageCombinationResponse(
-			Perturbation perturbation) {
-		int index = getIndexOfPerturbation(perturbation);
+	public double getPredictedAverageCombinationResponse(Perturbation perturbation) {
 		double response = perturbation.getAveragePredictedResponse();
 
-		Drug[][] subsets = DrugPanel.getCombinationSubsets(perturbation
-				.getDrugs());
+		Drug[][] subsets = DrugPanel.getCombinationSubsets(perturbation.getDrugs());
 		int indexSubset[] = new int[subsets.length];
-
-		// logger.output(1, perturbations[index].getName());
 
 		for (int i = 0; i < subsets.length; i++) {
 			indexSubset[i] = getIndexOfPerturbation(subsets[i]);
-			// logger.output(1, perturbations[indexSubset[i]].getName());
 		}
 
-		double minimumResponseSubset = perturbations[indexSubset[0]]
-				.getAveragePredictedResponse();
-		double maximumResponseSubset = perturbations[indexSubset[0]]
-				.getAveragePredictedResponse();
+		double minimumResponseSubset = perturbations[indexSubset[0]].getAveragePredictedResponse();
+		double maximumResponseSubset = perturbations[indexSubset[0]].getAveragePredictedResponse();
 
 		for (int i = 1; i < indexSubset.length; i++) {
 			minimumResponseSubset = min(minimumResponseSubset,
@@ -239,8 +115,8 @@ public class PerturbationPanel {
 					perturbations[indexSubset[i]].getAveragePredictedResponse());
 		}
 
-		// logger.output(1, "min: " + minimumResponseSubset + " max: " +
-		// maximumResponseSubset);
+		logger.debug("min: " + minimumResponseSubset + " max: " + maximumResponseSubset);
+
 		if (response < minimumResponseSubset)
 			return response - minimumResponseSubset;
 		else if (response > maximumResponseSubset)
@@ -261,33 +137,26 @@ public class PerturbationPanel {
 		return responses;
 	}
 
-	// How define SD for ratio towards minimum
+	/**
+	 * Creates an array of names from an array of drug combinations by calling
+	 * getCombinationName for each subarray
+	 * 
+	 * @param combinations
+	 * @return name of drug combination
+	 */
+	public String[] getCombinationNames(Drug[][] combinations) {
+		String[] names = new String[combinations.length];
 
-	// public double getPredictedCombinationResponseStandardDeviation
-	// (Perturbation perturbation)
-	// {
-	// int index = getIndexOfPerturbation(perturbation) ;
-	//
-	// double sd = 0 ;
-	//
-	// }
-
-	public double[] getObservedCombinationResponses(int combinationsize) {
-		double[] responses = new double[this
-				.getNumberOfPerturbations(combinationsize)];
-
-		Perturbation[] subset = this.getPerturbations(combinationsize);
-
-		for (int i = 0; i < responses.length; i++) {
-			responses[i] = subset[i].getObservedResponse();
+		for (int i = 0; i < combinations.length; i++) {
+			names[i] = getCombinationName(combinations[i]);
 		}
 
-		return responses;
+		return names;
 	}
 
 	/**
-	 * Creates name for drug combination by iterating drug names and adding them
-	 * to String, separating drug names by hyphens (-)
+	 * Creates name for drug combination by iterating drug names and adding them to
+	 * String, separating drug names by hyphens (-)
 	 * 
 	 * @param combination
 	 * @return name of drug combination
@@ -302,36 +171,17 @@ public class PerturbationPanel {
 		return getCombinationName(names);
 	}
 
-	/**
-	 * Creates an array of names for an array of drug combinations by calling
-	 * getCombinationName for each subarray
-	 * 
-	 * @param combinations
-	 * @return name of drug combination
-	 */
-	public static String[] getCombinationNames(Drug[][] combinations) {
-		String[] names = new String[combinations.length];
+	public static String getCombinationName(String[] combination) {
+		String namecombo = "[";
+		for (int i = 0; i < combination.length; i++) {
+			if (i > 0)
+				namecombo += "]-[";
 
-		for (int i = 0; i < combinations.length; i++) {
-			names[i] = getCombinationName(combinations[i]);
+			namecombo += combination[i];
 		}
+		namecombo += "]";
 
-		return names;
+		return namecombo;
 	}
 
-	private static double min(double a, double b) {
-		if (a > b)
-			return b;
-		else
-			return a;
-
-	}
-
-	private static double max(double a, double b) {
-		if (a < b)
-			return b;
-		else
-			return a;
-
-	}
 }

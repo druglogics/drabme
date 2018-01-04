@@ -1,7 +1,6 @@
 package drabme;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -11,23 +10,20 @@ import org.paukov.combinatorics.Factory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
+import gitsbe.BooleanModel;
 import gitsbe.Logger;
+
+import static gitsbe.Util.*;
 
 public class DrugPanel {
 
 	// Panel of single drugs to be used
 	protected ArrayList<Drug> drugs;
-
-	private Logger logger ;
-	// Panel of perturbations, given combination sizes
-	// protected ArrayList <Drug[]> perturbations ;
+	private Logger logger;
 
 	public DrugPanel(String filename, Logger logger) throws IOException {
-		
-		this.logger = logger ;
-		
-		drugs = new ArrayList<Drug>();
-
+		this.logger = logger;
+		this.drugs = new ArrayList<Drug>();
 		loadDrugsFromFile(filename);
 	}
 
@@ -42,7 +38,6 @@ public class DrugPanel {
 			if (!isDrugInPanel(name[i]))
 				return false;
 		}
-
 		return true;
 	}
 
@@ -55,8 +50,7 @@ public class DrugPanel {
 	public boolean isDrugInPanel(String name) {
 		if (getIndexOfDrug(name) >= 0)
 			return true;
-		else
-			return false;
+		return false;
 	}
 
 	/**
@@ -90,10 +84,8 @@ public class DrugPanel {
 
 		if (index >= 0) {
 			return drugs.get(index);
-		} else {
-			throw new Exception(
-					"Exception: Drug not found in drug panel. Use function isDrugInPanel (String name)");
 		}
+		throw new Exception("Exception: Drug not found in drug panel. Use function isDrugInPanel (String name)");
 	}
 
 	/**
@@ -103,78 +95,57 @@ public class DrugPanel {
 	 * @throws IOException
 	 */
 	public void loadDrugsFromFile(String filename) throws IOException {
-		ArrayList<String> lines = new ArrayList<String>();
 
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-
-		try {
-			while (true) {
-				String line = reader.readLine();
-				// no more lines to read
-				if (line == null) {
-					reader.close();
-					break;
-				}
-
-				if (!line.startsWith("#")) {
-					lines.add(line);
-				}
-			}
-		}
-
-		finally {
-			reader.close();
-		}
+		logger.outputStringMessage(3, "Reading drugpanel file: " + new File(filename).getAbsolutePath());
+		ArrayList<String> lines = readLinesFromFile(filename, true);
 
 		for (int i = 0; i < lines.size(); i++) {
 			// Add drug name
-			drugs.add(new Drug(lines.get(i).split("\t")[0], logger));
+			String drugName = lines.get(i).split("\t")[0];
+			drugs.add(new Drug(drugName, logger));
 
 			// Add perturbation effect
-
 			String effect = lines.get(i).split("\t")[1];
 			if (effect.equals("inhibits")) {
 				drugs.get(i).addEffect(false);
 			} else if (effect.equals("activates")) {
 				drugs.get(i).addEffect(true);
 			} else {
-				logger.output(1,
-						"ERROR: Drug effect not annotated as either \"activates\" or \"inhibits\" "
-								+ (effect));
+				logger.outputStringMessage(1,
+						"Drug effect not annotated as either \"activates\" or \"inhibits\" " + (effect));
 			}
 
 			// Add drug targets
-			drugs.get(i).addTargets(
-					Arrays.copyOfRange(lines.get(i).split("\t"), 2, lines
-							.get(i).split("\t").length));
+			drugs.get(i).addTargets(Arrays.copyOfRange(lines.get(i).split("\t"), 2, lines.get(i).split("\t").length));
+		}
+	}
 
+	/**
+	 * Adds warnings to the log if there are drug targets not defined in the
+	 * model/network topology
+	 * 
+	 * @param drugPanel
+	 * @param booleanModels
+	 * @throws Exception
+	 */
+	public void checkDrugTargets(ArrayList<BooleanModel> booleanModels) {
+		logger.outputHeader(3, "Checking drug targets");
+
+		BooleanModel booleanModel = booleanModels.get(0);
+		ArrayList<String> nodes = booleanModel.getNodeNames();
+
+		for (Drug drug : this.drugs) {
+			for (String target : drug.getTargets()) {
+				if (!nodes.contains(target)) {
+					logger.outputStringMessage(3, "Warning: Target " + target + " not in network file.");
+				}
+			}
 		}
 	}
 
 	public Drug[][] loadCombinationsFromFile(String filename) throws Exception {
-		ArrayList<String> lines = new ArrayList<String>();
 
-		BufferedReader reader = new BufferedReader(new FileReader(filename));
-
-		try {
-			while (true) {
-				String line = reader.readLine();
-				// no more lines to read
-				if (line == null) {
-					reader.close();
-					break;
-				}
-
-				if (!line.startsWith("#")) {
-					lines.add(line);
-				}
-			}
-		}
-
-		finally {
-			reader.close();
-		}
-
+		ArrayList<String> lines = readLinesFromFile(filename, true);
 		ArrayList<Drug[]> perturbations = new ArrayList<Drug[]>();
 
 		for (int i = 0; i < lines.size(); i++) {
@@ -183,70 +154,92 @@ public class DrugPanel {
 			Drug[] combination = new Drug[combosize];
 
 			for (int j = 0; j < combosize; j++) {
-				if (isDrugInPanel(lines.get(i).split("\t")[j])) {
-					String drugname = lines.get(i).split("\t")[j];
-					// System.out.println(drugname) ;
+				String drugname = lines.get(i).split("\t")[j];
+				if (isDrugInPanel(drugname)) {
 					combination[j] = getDrug(drugname);
-					// System.out.println(combination[j].getName()) ;
 				} else {
-					logger.output(1,
-							"ERROR: Combination refers to drug not in drugpanel: "
-									+ lines.get(i).split("\t")[j]);
+					logger.outputStringMessage(1, "ERROR: Combination refers to drug not in drugpanel: " + drugname);
+					System.exit(1);
 				}
-
 			}
-			// if (combination != null)
 			perturbations.add(combination);
 		}
 
-		// logger.outputHeader(2, "Loaded combinations from file");
-		//
-		// for (int i = 0; i < perturbations.size(); i++)
-		// {
-		// String output = "" ;
-		// for (int j = 0; j< perturbations.get(i).length; j++)
-		// {
-		// output += perturbations.get(i)[j].getName() ;
-		// if (j > 0)
-		// output += "-" ;
-		//
-		// }
-		// logger.output(2, output);
-		// }
-		//
+		checkDrugCombinationConsistency(perturbations);
 
 		return perturbations.toArray(new Drug[0][]);
 	}
 
-	public static void saveDrugPanelFileTemplate(String filename)
-			throws IOException {
+	/**
+	 * Checks if the drug combinations from the perturbations file are consistent:
+	 * If I have drugs AK and PI as perturbations and not PD, I can have AK-PI
+	 * combination, but not AK-PD for example. This means that for every combination
+	 * (no matter the size) I should have its subsets in the perturbations
+	 * 
+	 * @param perturbations
+	 */
+	private void checkDrugCombinationConsistency(ArrayList<Drug[]> perturbations) {
+		boolean foundSubset = false;
+
+		for (int index = 0; index < perturbations.size(); index++) {
+			Drug[] combination = perturbations.get(index);
+			logger.debug("Combination: " + PerturbationPanel.getCombinationName(combination));
+			if (combination.length > 1) { // pairs of drugs, triplets, etc.
+				// generate the subsets
+				Drug[][] subsets = getCombinationSubsets(combination);
+
+				// for every subset check that there is a defined perturbation in the file
+				for (int j = 0; j < subsets.length; j++) {
+					Drug[] subset = subsets[j];
+
+					foundSubset = false;
+					for (int k = 0; k < index; k++) {
+						logger.debug("Checking subset: " + PerturbationPanel.getCombinationName(subset)
+								+ " with perturbation: " + PerturbationPanel.getCombinationName(perturbations.get(k)));
+						if (Arrays.equals(perturbations.get(k), subset)) {
+							logger.debug("FOUND!");
+							foundSubset = true;
+							break;
+						}
+					}
+					if (!foundSubset) {
+						logger.outputStringMessage(0,
+								"ERROR: The drug combination: " + PerturbationPanel.getCombinationName(combination)
+										+ " does not have the subset: " + PerturbationPanel.getCombinationName(subset)
+										+ " defined in the perturbations file");
+						System.exit(1);
+					}
+				}
+			}
+		}
+	}
+
+	public static void writeDrugPanelFileTemplate(String filename) throws IOException {
 		PrintWriter writer = new PrintWriter(filename, "UTF-8");
 
-		// Write header with '#'
-		writer.println("# Drugs and drug targets");
-		writer.println("#");
-		writer.println("# First column is name of drug, subsequent tab-separated ");
-		writer.println("# columns indicate drug target(s).");
-		writer.println("#");
-		writer.println("# Name of drug targets must match name of targeted node in model.");
-		writer.println("#");
-		writer.println("# Name\tTarget");
-		writer.println("#");
+		writer.println("#Name\tEffect\tTarget");
+		writer.println("PI\tinhibits\tPIK3CA");
+		writer.println("PD\tinhibits\tMAP2K1\tMAP2K2");
+		writer.println("CT\tinhibits\tGSK3A\tGSK3B");
+		writer.println("BI\tinhibits\tMAPK14");
+		writer.println("PK\tinhibits\tCTNNB1");
+		writer.println("AK\tinhibits\tAKT\tAKT1\tAKT2\tAKT3");
+		writer.println("5Z\tinhibits\tMAP3K7");
 
+		writer.flush();
 		writer.close();
 	}
 
 	public Drug[][] getCombinations(int size) {
-		return getCombinations(size, 0);
+		return getCombinations(0, size);
 	}
 
 	/**
 	 * 
-	 * @param combosize
 	 * @return array of drug arrays, where each drug array is a perturbation
 	 *         condition (set of drugs)
 	 */
-	public Drug[][] getCombinations(int upperlimit, int lowerlimit) {
+	public Drug[][] getCombinations(int lowerlimit, int upperlimit) {
 
 		ArrayList<Drug[]> perturbations = new ArrayList<Drug[]>();
 
@@ -258,13 +251,11 @@ public class DrugPanel {
 			// Next add each drug combination to perturbation set
 			// --------------------------------------------------
 
-			ICombinatoricsVector<Drug> initialVector = Factory
-					.createVector(drugs.toArray(new Drug[0]));
+			ICombinatoricsVector<Drug> initialVector = Factory.createVector(drugs.toArray(new Drug[0]));
 
 			// Create a simple combination generator to generate n-combinations
 			// of the initial vector
-			Generator<Drug> gen = Factory.createSimpleCombinationGenerator(
-					initialVector, k);
+			Generator<Drug> gen = Factory.createSimpleCombinationGenerator(initialVector, k);
 
 			ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<ICombinatoricsVector<Drug>>();
 
@@ -278,27 +269,14 @@ public class DrugPanel {
 				for (int j = 0; j < k; j++) {
 					temp[j] = drugs.get(i).getValue(j);
 				}
-
-				perturbations.add(temp);
+				// We don't want an empty perturbation
+				if (!(temp.length == 0)) {
+					perturbations.add(temp);
+				}
 			}
 		}
 
-		// if (Drabme.verbosity >= 2)
-		// {
-		// logger.output(2, "\n" + (perturbations.size()-1) +
-		// " conditions added to perturbation set:");
-		//
-		// for (int i = 0; i < perturbations.size (); i++)
-		// {
-		// for (int j = 0; j < perturbations.get(i).length; j++)
-		// {
-		// logger.output(2, perturbations.get(i)[j].getName() + " ") ;
-		// }
-		// logger.output(2, "") ;
-		// }
-		// }
 		return perturbations.toArray(new Drug[0][]);
-
 	}
 
 	/**
@@ -309,17 +287,15 @@ public class DrugPanel {
 	 */
 	public static Drug[][] getCombinationSubsets(Drug[] combination) {
 		ArrayList<Drug[]> subsets = new ArrayList<Drug[]>();
-		
+
 		int drugsInCombination = combination.length;
 		int drugsInSubset = drugsInCombination - 1;
 
-		ICombinatoricsVector<Drug> initialVector = Factory
-				.createVector(combination);
+		ICombinatoricsVector<Drug> initialVector = Factory.createVector(combination);
 
 		// Create a simple combination generator to generate n-combinations of
 		// the initial vector
-		Generator<Drug> gen = Factory.createSimpleCombinationGenerator(
-				initialVector, drugsInSubset);
+		Generator<Drug> gen = Factory.createSimpleCombinationGenerator(initialVector, drugsInSubset);
 
 		ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<ICombinatoricsVector<Drug>>();
 
@@ -332,8 +308,6 @@ public class DrugPanel {
 
 			for (int j = 0; j < drugsInSubset; j++) {
 				temp[j] = drugs.get(i).getValue(j);
-				// System.out.print(drugs.get(i).getValue(j).getName() + " ");
-
 			}
 
 			subsets.add(temp);
@@ -355,9 +329,8 @@ public class DrugPanel {
 
 		for (int i = 0; i < drugs.length; i++) {
 			hash += drugs[i].getName().hashCode();
-			
-			for (int j = 0; j < drugs[i].getTargets().size(); j++)
-			{
+
+			for (int j = 0; j < drugs[i].getTargets().size(); j++) {
 				hash += drugs[i].getTargets().get(j).hashCode();
 			}
 		}
