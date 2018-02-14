@@ -105,7 +105,7 @@ public class ResponseModel {
 		}
 
 		if (computable) {
-			int minimumGlobalOutput = perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
+			float minimumGlobalOutput = perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
 
 			// find the subset with the minimum global output
 			for (int i = 0; i < subsets.length; i++) {

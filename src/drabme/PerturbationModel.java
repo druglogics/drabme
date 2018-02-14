@@ -19,7 +19,7 @@ public class PerturbationModel extends BooleanModel {
 
 	private Perturbation perturbation;
 	private ModelOutputs modelOutputs;
-	private int globaloutput;
+	private float globaloutput;
 	private boolean hasGlobalOutput = false;
 	private Logger logger;
 
@@ -81,7 +81,7 @@ public class PerturbationModel extends BooleanModel {
 		return this.hasGlobalOutput;
 	}
 
-	public int getGlobalOutput() {
+	public float getGlobalOutput() {
 		return globaloutput;
 	}
 

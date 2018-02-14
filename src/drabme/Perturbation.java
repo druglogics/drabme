@@ -9,7 +9,7 @@ public class Perturbation {
 
 	private Drug[] drugs;
 	private int perturbationHash;
-	private ArrayList<Integer> predictedResponses;
+	private ArrayList<Float> predictedResponses;
 
 	private int predictedSynergies;
 	private int predictedNonSynergies;
@@ -26,7 +26,7 @@ public class Perturbation {
 
 		this.logger = logger;
 		drugs = perturbation;
-		predictedResponses = new ArrayList<Integer>();
+		predictedResponses = new ArrayList<Float>();
 
 		predictedSynergies = 0;
 		predictedNonSynergies = 0;
@@ -58,16 +58,16 @@ public class Perturbation {
 		return predictedNonSynergies;
 	}
 
-	synchronized public void addPrediction(int response) {
+	synchronized public void addPrediction(float response) {
 		predictedResponses.add(response);
 	}
 
-	public int[] getPredictions() {
-		return convertIntegers(predictedResponses);
+	public float[] getPredictions() {
+		return convertFloats(predictedResponses);
 	}
 
 	public void calculateStatistics() {
-		int responseSum = 0;
+		float responseSum = 0;
 		int numPredictions = predictedResponses.size();
 
 		for (int i = 0; i < numPredictions; i++) {
@@ -83,7 +83,7 @@ public class Perturbation {
 
 			if (numPredictions > 1) {
 				for (int i = 0; i < numPredictions; i++) {
-					int prediction = predictedResponses.get(i);
+					float prediction = predictedResponses.get(i);
 					var += (prediction - mean) * (prediction - mean);
 				}
 				sd = Math.sqrt(var / (numPredictions - 1));
@@ -140,7 +140,8 @@ public class Perturbation {
 	 * @param integers
 	 * @return
 	 */
-	public static int[] convertIntegers(ArrayList<Integer> integers) {
+	@SuppressWarnings("unused")
+	private int[] convertIntegers(ArrayList<Integer> integers) {
 		int[] result = new int[integers.size()];
 		Iterator<Integer> iterator = integers.iterator();
 		for (int i = 0; i < result.length; i++) {
@@ -148,12 +149,21 @@ public class Perturbation {
 		}
 		return result;
 	}
-
-	public static double[] convertDoubles(Double[] doubles) {
-		double[] result = new double[doubles.length];
+	
+	/**
+	 * Converts an ArrayList of Floats to an Array of float values
+	 * 
+	 * @param floats
+	 * @return
+	 */
+	private float[] convertFloats(ArrayList<Float> floats) {
+		float[] result = new float[floats.size()];
+		Iterator<Float> iterator = floats.iterator();
 		for (int i = 0; i < result.length; i++) {
-			result[i] = doubles[i].doubleValue();
+			result[i] = iterator.next().floatValue();
 		}
 		return result;
 	}
+
+	
 }

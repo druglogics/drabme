@@ -235,9 +235,9 @@ public class Drabme implements Runnable {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
 			String individualresponses = "";
-
-			for (int j = 0; j < perturbation.getPredictions().length; j++) {
-				individualresponses += "\t" + perturbation.getPredictions()[j];
+			float[] predictions = perturbation.getPredictions();
+			for (int j = 0; j < predictions.length; j++) {
+				individualresponses += "\t" + predictions[j];
 			}
 
 			logger.outputStringMessageToFile(filename,
