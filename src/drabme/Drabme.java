@@ -4,8 +4,10 @@ import gitsbe.Logger;
 import gitsbe.ModelOutputs;
 import gitsbe.Timer;
 import gitsbe.BooleanModel;
+import gitsbe.FileDeleter;
 
 import static gitsbe.Util.*;
+import static gitsbe.FileDeleter.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -91,9 +93,9 @@ public class Drabme implements Runnable {
 		ModelOutputs outputs = loadModelOutputs(booleanModels);
 
 		// Create temp directory
-		File tempDir = new File(directoryTmp);
 		if (!createDirectory(directoryTmp, logger))
 			return;
+		initializeFileDeleter();
 
 		// Run simulations and compute Statistics
 		runDrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, logDirectory);
@@ -105,13 +107,20 @@ public class Drabme implements Runnable {
 		generateEnsembleWiseSynergies(perturbationPanel);
 
 		// Clean tmp directory
-		cleanTmpDirectory(tempDir);
+		cleanDirectory(logger);
 
 		// Stop timer
 		timer.stopTimer();
 		logger.outputHeader(1, "\nThe end");
 
 		closeLogger(timer);
+	}
+
+	private void initializeFileDeleter() {
+		FileDeleter fileDeleter = new FileDeleter(directoryTmp);
+		if (!preserveTmpFiles) {
+			fileDeleter.activate();
+		}
 	}
 
 	private void runDrugResponseAnalyzer(PerturbationPanel perturbationPanel, ArrayList<BooleanModel> booleanModels,
@@ -325,14 +334,6 @@ public class Drabme implements Runnable {
 		outputs.checkModelOutputNodeNames(booleanModels.get(0));
 
 		return outputs;
-	}
-
-	private void cleanTmpDirectory(File tempDir) {
-		if (!preserveTmpFiles) {
-			logger.outputStringMessage(2, "\n" + "Deleting temporary directory: " + tempDir.getAbsolutePath());
-			deleteFilesFromDirectory(tempDir);
-			tempDir.delete();
-		}
 	}
 
 	private void closeLogger(Timer timer) {
