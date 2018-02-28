@@ -56,6 +56,7 @@ public class Launcher {
 				t.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				System.exit(1);
 			}
 		}
 	}
