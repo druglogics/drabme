@@ -351,6 +351,11 @@ public class Drabme implements Runnable {
 		File[] files = new File(directory).listFiles();
 		File file;
 
+		if (files.length == 0) {
+			logger.outputStringMessage(0, "ERROR: No models are in the model directory. Drabme analysis stops.");
+			System.exit(1);
+		}
+
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].getAbsolutePath().toLowerCase().contains("gitsbe")) {
 				file = files[i];
