@@ -95,7 +95,7 @@ public class Perturbation {
 		this.sd = sd;
 
 		isStatisticsCalculated = true;
-		logger.outputStringMessage(0,
+		logger.outputStringMessage(1,
 				"Statistics calculated for perturbation: " + PerturbationPanel.getCombinationName(drugs));
 	}
 

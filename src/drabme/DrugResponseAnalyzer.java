@@ -41,14 +41,13 @@ public class DrugResponseAnalyzer {
 	}
 
 	private void runSimulation(int modelIndex) throws IOException {
-		int verbosity = 3;
 		String modelName = booleanModels.get(modelIndex).getModelName();
 		String filenameOutput = Drabme.appName + modelName.substring(modelName.lastIndexOf("_run_")) + "_log.txt";
 
 		addFileToSimulationFileList(new File(logDirectory, filenameOutput).getAbsolutePath());
 
 		// create new logger for each (parallel) simulation
-		Logger simulation_logger = new Logger(filenameOutput, logDirectory, verbosity, true);
+		Logger simulation_logger = new Logger(filenameOutput, logDirectory, logger.getVerbosity(), true);
 		simulation_logger.outputHeader(2, "Adding model " + modelName);
 
 		ResponseModel responseModel = new ResponseModel(booleanModels.get(modelIndex), modelOutputs, perturbationPanel,
