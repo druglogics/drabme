@@ -27,6 +27,7 @@ public class ResponseModel {
 	private Logger logger;
 	private String modelName;
 	private ArrayList<PerturbationModel> perturbationModels; // Set of boolean models extended with perturbations
+	private ModelPredictions modelPredictions;
 
 	public ResponseModel(BooleanModel booleanModel, ModelOutputs modelOutputs, PerturbationPanel perturbationPanel,
 			Logger logger) {
@@ -35,6 +36,7 @@ public class ResponseModel {
 		this.perturbationPanel = perturbationPanel;
 		this.logger = logger;
 		this.modelName = booleanModel.getModelName() + "_responsemodel";
+		this.modelPredictions = new ModelPredictions(originalModel.getModelName());
 	}
 
 	public String getModelName() {
@@ -53,41 +55,44 @@ public class ResponseModel {
 	}
 
 	public void simulateResponses(String directoryTmp) throws IOException {
+
 		for (int i = 0; i < perturbationModels.size(); i++) {
 			logger.outputStringMessage(2, ""); // Add blank line for better visualization of results
 
+			PerturbationModel perturbationModel = perturbationModels.get(i);
+			Perturbation perturbation = perturbationModel.getPerturbation();
+
 			// Calculate stable state(s), then determine global output
-			perturbationModels.get(i).calculateStableStatesVC(directoryTmp);
-			perturbationModels.get(i).calculateGlobalOutput();
+			perturbationModel.calculateStableStatesVC(directoryTmp);
+			perturbationModel.calculateGlobalOutput();
 
 			// Store response for perturbation set
-			if (perturbationModels.get(i).hasGlobalOutput()) {
-				logger.outputStringMessage(2,
-						"Adding predicted response for perturbation "
-								+ perturbationModels.get(i).getPerturbation().getName() + ": "
-								+ perturbationModels.get(i).getGlobalOutput());
-				perturbationModels.get(i).getPerturbation().addPrediction(perturbationModels.get(i).getGlobalOutput());
+			if (perturbationModel.hasGlobalOutput()) {
+				logger.outputStringMessage(2, "Adding predicted response for perturbation " + perturbation.getName()
+						+ ": " + perturbationModel.getGlobalOutput());
+				perturbation.addPrediction(perturbationModel.getGlobalOutput());
 			}
 
 			// Check for synergies among drugs in combination (more than two drugs)
-			if (perturbationModels.get(i).getPerturbation().getDrugs().length >= 2) {
-				this.isCombinationSynergistic(perturbationModels.get(i).getPerturbation().getDrugs());
+			if (perturbation.getDrugs().length >= 2) {
+				checkCombinationSynergy(perturbation.getDrugs());
 			}
 		}
 	}
 
-	public boolean isCombinationSynergistic(Drug[] combination) {
-		boolean value = false;
+	public void checkCombinationSynergy(Drug[] combination) {
 
 		if (combination.length == 2)
 			logger.debug("Combination: " + combination[0].getName() + " " + combination[1].getName());
 
-		logger.debug("DrugHash:" + DrugPanel.getDrugSetHash(combination));
+		int drugHash = DrugPanel.getDrugSetHash(combination);
+		logger.debug("DrugHash:" + drugHash);
 
 		PerturbationModel combinationResponse = perturbationModels.get(getIndexOfPerturbationModel(combination));
 		Perturbation perturbation = combinationResponse.getPerturbation();
 
 		Drug[][] subsets = DrugPanel.getCombinationSubsets(combination);
+		String drugCombination = PerturbationPanel.getCombinationName(combination);
 
 		for (int i = 0; i < subsets.length; i++) {
 			logger.debug("Combination subsets:" + PerturbationPanel.getCombinationName(subsets[i]));
@@ -105,7 +110,8 @@ public class ResponseModel {
 		}
 
 		if (computable) {
-			float minimumGlobalOutput = perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
+			float minimumGlobalOutput = perturbationModels.get(getIndexOfPerturbationModel(subsets[0]))
+					.getGlobalOutput();
 
 			// find the subset with the minimum global output
 			for (int i = 0; i < subsets.length; i++) {
@@ -115,20 +121,18 @@ public class ResponseModel {
 
 			if (combinationResponse.getGlobalOutput() < minimumGlobalOutput) {
 				perturbation.addSynergyPrediction();
-				value = true;
-				logger.outputStringMessage(2, PerturbationPanel.getCombinationName(combination) + " is synergistic");
+				modelPredictions.addSynergyPrediction(drugCombination);
+				logger.outputStringMessage(2, drugCombination + " is synergistic");
 			} else {
 				perturbation.addNonSynergyPrediction();
-				value = false;
-				logger.outputStringMessage(2,
-						PerturbationPanel.getCombinationName(combination) + " is NOT synergistic");
+				modelPredictions.addNonSynergyPrediction(drugCombination);
+				logger.outputStringMessage(2, drugCombination + " is NOT synergistic");
 			}
 		} else {
-			logger.outputStringMessage(2, PerturbationPanel.getCombinationName(combination)
-					+ " cannot be evaluated for synergy (lacking stable state(s))");
+			modelPredictions.addNAPrediction(drugCombination);
+			logger.outputStringMessage(2,
+					drugCombination + " cannot be evaluated for synergy (lacking stable state(s))");
 		}
-
-		return value;
 	}
 
 	private int getIndexOfPerturbationModel(Drug[] drugs) {
@@ -145,6 +149,10 @@ public class ResponseModel {
 		}
 
 		return -1;
+	}
+
+	public ModelPredictions getModelPredictions() {
+		return modelPredictions;
 	}
 
 }

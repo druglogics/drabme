@@ -18,6 +18,7 @@ public class DrugResponseAnalyzer {
 	private Logger logger;
 	private String logDirectory;
 	public ArrayList<String> simulationFileList;
+	public ArrayList<ModelPredictions> modelPredictionsList;
 
 	public DrugResponseAnalyzer(PerturbationPanel perturbationPanel, ArrayList<BooleanModel> booleanModels,
 			ModelOutputs modelOutputs, String directoryTmp, Logger logger, String logDirectory) {
@@ -28,6 +29,7 @@ public class DrugResponseAnalyzer {
 		this.logger = logger;
 		this.logDirectory = logDirectory;
 		this.simulationFileList = new ArrayList<String>();
+		this.modelPredictionsList = new ArrayList<ModelPredictions>();
 	}
 
 	public void analyze() {
@@ -55,6 +57,8 @@ public class DrugResponseAnalyzer {
 		responseModel.initializeResponseModel();
 		responseModel.simulateResponses(directoryTmp);
 
+		addModelPredictionsToList(responseModel.getModelPredictions());
+
 		simulation_logger.finish();
 	}
 
@@ -67,5 +71,9 @@ public class DrugResponseAnalyzer {
 
 	synchronized private void addFileToSimulationFileList(String filename) {
 		simulationFileList.add(filename);
+	}
+
+	synchronized private void addModelPredictionsToList(ModelPredictions modelPredictions) {
+		modelPredictionsList.add(modelPredictions);
 	}
 }

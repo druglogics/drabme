@@ -98,13 +98,16 @@ public class Drabme implements Runnable {
 		initializeFileDeleter();
 
 		// Run simulations and compute Statistics
-		runDrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, logDirectory);
+		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, directoryTmp,
+				logger, logDirectory);
+		runDrugResponseAnalyzer(dra, logDirectory);
 
 		// Generate Summary Reports for Drabme
 		generateModelWiseResponses(perturbationPanel);
 		generateModelWiseSynergies(perturbationPanel, booleanModels);
 		generateEnsembleWiseResponses(perturbationPanel);
 		generateEnsembleWiseSynergies(perturbationPanel);
+		generateModelPredictions(dra.modelPredictionsList, perturbationPanel);
 
 		// Clean tmp directory
 		cleanDirectory(logger);
@@ -116,6 +119,53 @@ public class Drabme implements Runnable {
 		closeLogger(timer);
 	}
 
+	/**
+	 * Each model's predicted synergies, non-synergies and NA results for each drug
+	 * combination tested
+	 * 
+	 * @param modelPredictionsList
+	 * @param perturbationPanel
+	 */
+	private void generateModelPredictions(ArrayList<ModelPredictions> modelPredictionsList,
+			PerturbationPanel perturbationPanel) {
+		String filename = new File(directoryOutput, "output_" + nameProject + "_model_predictions.tab")
+				.getAbsolutePath();
+
+		ArrayList<String> drugCombinationsList = getDrugCombinationsList(perturbationPanel);
+
+		String headerString = "ModelName";
+		for (String drugCombination : drugCombinationsList) {
+			headerString += "\t" + drugCombination;
+		}
+
+		logger.outputHeader(1, "Model Predictions");
+		logger.outputStringMessageToFile(filename, headerString);
+
+		for (ModelPredictions modelPredictions : modelPredictionsList) {
+			String modelPredictionsString = modelPredictions.getModelPredictionsVerbose(drugCombinationsList);
+			logger.outputStringMessageToFile(filename, modelPredictionsString);
+		}
+	}
+
+	/**
+	 * Returns a list of Strings that represent the drug combinations (not the
+	 * single drugs)
+	 * 
+	 * @param perturbationPanel
+	 * @return
+	 */
+	private ArrayList<String> getDrugCombinationsList(PerturbationPanel perturbationPanel) {
+		ArrayList<String> drugCombinationsList = new ArrayList<>();
+		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
+			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
+
+			if (perturbation.getDrugs().length >= 2) {
+				drugCombinationsList.add(perturbation.getName());
+			}
+		}
+		return drugCombinationsList;
+	}
+
 	private void initializeFileDeleter() {
 		FileDeleter fileDeleter = new FileDeleter(directoryTmp);
 		if (!preserveTmpFiles) {
@@ -123,14 +173,10 @@ public class Drabme implements Runnable {
 		}
 	}
 
-	private void runDrugResponseAnalyzer(PerturbationPanel perturbationPanel, ArrayList<BooleanModel> booleanModels,
-			ModelOutputs outputs, String logDirectory) {
-
-		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, directoryTmp,
-				logger, logDirectory);
+	private void runDrugResponseAnalyzer(DrugResponseAnalyzer dra, String logDirectory) {
 		dra.analyze();
-		mergeLogFiles(dra, logDirectory);
 		dra.computeStatistics();
+		mergeLogFiles(dra, logDirectory);
 	}
 
 	/**
