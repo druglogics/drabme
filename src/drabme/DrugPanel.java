@@ -158,7 +158,7 @@ public class DrugPanel {
 				if (isDrugInPanel(drugname)) {
 					combination[j] = getDrug(drugname);
 				} else {
-					logger.outputStringMessage(1, "ERROR: Combination refers to drug not in drugpanel: " + drugname);
+					logger.error("Combination refers to drug not in drugpanel: " + drugname);
 					System.exit(1);
 				}
 			}
@@ -203,10 +203,9 @@ public class DrugPanel {
 						}
 					}
 					if (!foundSubset) {
-						logger.outputStringMessage(0,
-								"ERROR: The drug combination: " + PerturbationPanel.getCombinationName(combination)
-										+ " does not have the subset: " + PerturbationPanel.getCombinationName(subset)
-										+ " defined in the perturbations file");
+						logger.error("The drug combination: " + PerturbationPanel.getCombinationName(combination)
+									+ " does not have the subset: " + PerturbationPanel.getCombinationName(subset)
+									+ " defined in the perturbations file");
 						System.exit(1);
 					}
 				}

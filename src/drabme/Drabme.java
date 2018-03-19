@@ -266,7 +266,7 @@ public class Drabme implements Runnable {
 			// drugs
 			if ((perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions()) > booleanModels
 					.size()) {
-				logger.outputStringMessage(1, "ERROR: Synergy and non-synergy count error: "
+				logger.error("Synergy and non-synergy count error: "
 						+ perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions());
 				System.exit(1);
 			}
@@ -398,7 +398,7 @@ public class Drabme implements Runnable {
 		File file;
 
 		if (files.length == 0) {
-			logger.outputStringMessage(0, "ERROR: No models are in the model directory. Drabme analysis stops.");
+			logger.error("No models are in the model directory. Drabme analysis stops.");
 			System.exit(1);
 		}
 
