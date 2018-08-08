@@ -1,13 +1,13 @@
-package drabme;
+package eu.druglogics.drabme;
 
-import gitsbe.Logger;
-import gitsbe.ModelOutputs;
-import gitsbe.Timer;
-import gitsbe.BooleanModel;
-import gitsbe.FileDeleter;
+import eu.druglogics.gitsbe.Logger;
+import eu.druglogics.gitsbe.ModelOutputs;
+import eu.druglogics.gitsbe.Timer;
+import eu.druglogics.gitsbe.BooleanModel;
+import eu.druglogics.gitsbe.FileDeleter;
 
-import static gitsbe.Util.*;
-import static gitsbe.FileDeleter.*;
+import static eu.druglogics.gitsbe.Util.*;
+import static eu.druglogics.gitsbe.FileDeleter.*;
 
 import java.io.File;
 import java.io.IOException;

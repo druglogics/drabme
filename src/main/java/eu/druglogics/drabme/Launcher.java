@@ -1,6 +1,6 @@
-package drabme;
+package eu.druglogics.drabme;
 
-import static gitsbe.Util.*;
+import static eu.druglogics.gitsbe.Util.*;
 
 public class Launcher {
 

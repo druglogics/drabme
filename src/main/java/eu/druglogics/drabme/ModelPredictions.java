@@ -1,4 +1,4 @@
-package drabme;
+package eu.druglogics.drabme;
 
 import java.util.ArrayList;
 import java.util.HashMap;

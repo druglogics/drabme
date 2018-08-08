@@ -1,13 +1,12 @@
-package drabme;
+package eu.druglogics.drabme;
 
-import gitsbe.Logger;
-import gitsbe.ModelOutputs;
+import eu.druglogics.gitsbe.Logger;
+import eu.druglogics.gitsbe.ModelOutputs;
+import eu.druglogics.gitsbe.BooleanModel;
 
 import static java.lang.Math.*;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import gitsbe.BooleanModel;
 
 /**
  * Each ResponseModel is based on a single BooleanModel instance, and splits the

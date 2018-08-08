@@ -1,8 +1,8 @@
-package drabme;
+package eu.druglogics.drabme;
 
-import gitsbe.Logger;
-import gitsbe.ModelOutputs;
-import gitsbe.BooleanModel;
+import eu.druglogics.gitsbe.Logger;
+import eu.druglogics.gitsbe.ModelOutputs;
+import eu.druglogics.gitsbe.BooleanModel;
 
 import java.io.File;
 import java.io.IOException;

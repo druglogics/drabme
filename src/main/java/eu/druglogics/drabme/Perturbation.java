@@ -1,9 +1,9 @@
-package drabme;
+package eu.druglogics.drabme;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import gitsbe.Logger;
+import eu.druglogics.gitsbe.Logger;
 
 public class Perturbation {
 
