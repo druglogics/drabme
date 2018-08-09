@@ -1,4 +1,4 @@
-package eu.druglogics.drabme;
+package eu.druglogics.drabme.drug;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,10 +10,11 @@ import org.paukov.combinatorics.Factory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
-import eu.druglogics.gitsbe.BooleanModel;
-import eu.druglogics.gitsbe.Logger;
+import eu.druglogics.drabme.perturbation.PerturbationPanel;
+import eu.druglogics.gitsbe.model.BooleanModel;
+import eu.druglogics.gitsbe.util.Logger;
 
-import static eu.druglogics.gitsbe.Util.*;
+import static eu.druglogics.gitsbe.util.Util.*;
 
 public class DrugPanel {
 

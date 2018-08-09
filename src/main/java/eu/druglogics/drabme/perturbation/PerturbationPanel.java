@@ -1,6 +1,8 @@
-package eu.druglogics.drabme;
+package eu.druglogics.drabme.perturbation;
 
-import eu.druglogics.gitsbe.Logger;
+import eu.druglogics.drabme.drug.Drug;
+import eu.druglogics.drabme.drug.DrugPanel;
+import eu.druglogics.gitsbe.util.Logger;
 
 import static java.lang.Math.*;
 import java.util.ArrayList;

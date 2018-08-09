@@ -1,13 +1,19 @@
 package eu.druglogics.drabme;
 
-import eu.druglogics.gitsbe.Logger;
-import eu.druglogics.gitsbe.ModelOutputs;
-import eu.druglogics.gitsbe.Timer;
-import eu.druglogics.gitsbe.BooleanModel;
-import eu.druglogics.gitsbe.FileDeleter;
+import eu.druglogics.drabme.drug.Drug;
+import eu.druglogics.drabme.drug.DrugPanel;
+import eu.druglogics.drabme.drug.DrugResponseAnalyzer;
+import eu.druglogics.drabme.perturbation.ModelPredictions;
+import eu.druglogics.drabme.perturbation.Perturbation;
+import eu.druglogics.drabme.perturbation.PerturbationPanel;
+import eu.druglogics.gitsbe.util.Logger;
+import eu.druglogics.gitsbe.input.ModelOutputs;
+import eu.druglogics.gitsbe.util.Timer;
+import eu.druglogics.gitsbe.model.BooleanModel;
+import eu.druglogics.gitsbe.util.FileDeleter;
 
-import static eu.druglogics.gitsbe.Util.*;
-import static eu.druglogics.gitsbe.FileDeleter.*;
+import static eu.druglogics.gitsbe.util.Util.*;
+import static eu.druglogics.gitsbe.util.FileDeleter.*;
 
 import java.io.File;
 import java.io.IOException;

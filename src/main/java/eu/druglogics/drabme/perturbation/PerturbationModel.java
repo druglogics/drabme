@@ -1,12 +1,12 @@
-package eu.druglogics.drabme;
+package eu.druglogics.drabme.perturbation;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-import eu.druglogics.gitsbe.BooleanEquation;
-import eu.druglogics.gitsbe.BooleanModel;
-import eu.druglogics.gitsbe.Logger;
-import eu.druglogics.gitsbe.ModelOutputs;
+import eu.druglogics.gitsbe.model.BooleanEquation;
+import eu.druglogics.gitsbe.model.BooleanModel;
+import eu.druglogics.gitsbe.util.Logger;
+import eu.druglogics.gitsbe.input.ModelOutputs;
 
 /**
  * Similar to the BooleanModel in Gitsbe, but adds output weights, and drugs

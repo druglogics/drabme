@@ -1,6 +1,6 @@
-package eu.druglogics.drabme;
+package eu.druglogics.drabme.drug;
 
-import eu.druglogics.gitsbe.Logger;
+import eu.druglogics.gitsbe.util.Logger;
 
 import java.util.ArrayList;
 

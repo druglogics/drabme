@@ -1,8 +1,12 @@
-package eu.druglogics.drabme;
+package eu.druglogics.drabme.drug;
 
-import eu.druglogics.gitsbe.Logger;
-import eu.druglogics.gitsbe.ModelOutputs;
-import eu.druglogics.gitsbe.BooleanModel;
+import eu.druglogics.drabme.Drabme;
+import eu.druglogics.drabme.perturbation.ModelPredictions;
+import eu.druglogics.drabme.perturbation.PerturbationPanel;
+import eu.druglogics.drabme.perturbation.ResponseModel;
+import eu.druglogics.gitsbe.util.Logger;
+import eu.druglogics.gitsbe.input.ModelOutputs;
+import eu.druglogics.gitsbe.model.BooleanModel;
 
 import java.io.File;
 import java.io.IOException;

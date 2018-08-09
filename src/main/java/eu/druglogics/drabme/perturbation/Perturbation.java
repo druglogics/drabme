@@ -1,9 +1,11 @@
-package eu.druglogics.drabme;
+package eu.druglogics.drabme.perturbation;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import eu.druglogics.gitsbe.Logger;
+import eu.druglogics.drabme.drug.Drug;
+import eu.druglogics.drabme.drug.DrugPanel;
+import eu.druglogics.gitsbe.util.Logger;
 
 public class Perturbation {
 
