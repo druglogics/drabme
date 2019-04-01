@@ -17,10 +17,7 @@ import static eu.druglogics.gitsbe.util.FileDeleter.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Properties;
 
 /* Drabme - Drug Response Analysis of Boolean Models from Evolution
@@ -89,7 +86,7 @@ public class Drabme implements Runnable {
 		Timer timer = new Timer();
 
 		// Load boolean models
-		ArrayList<BooleanModel> booleanModels = new ArrayList<BooleanModel>();
+		ArrayList<BooleanModel> booleanModels = new ArrayList<>();
 		loadModels(booleanModels);
 
 		// Load drugs
@@ -154,13 +151,14 @@ public class Drabme implements Runnable {
 
 		ArrayList<String> drugCombinationsList = getDrugCombinationsList(perturbationPanel);
 
-		String headerString = "ModelName";
+		StringBuilder headerString = new StringBuilder("ModelName");
 		for (String drugCombination : drugCombinationsList) {
-			headerString += "\t" + drugCombination;
+			String str = "\t" + drugCombination;
+			headerString.append(str);
 		}
 
 		logger.outputHeader(1, "Model Predictions");
-		logger.outputStringMessageToFile(filename, headerString);
+		logger.outputStringMessageToFile(filename, headerString.toString());
 
 		for (ModelPredictions modelPredictions : modelPredictionsList) {
 			String modelPredictionsString = modelPredictions.getModelPredictionsVerbose(drugCombinationsList);
@@ -203,7 +201,7 @@ public class Drabme implements Runnable {
 	/**
 	 * Merges all Drabme simulation logging files into one
 	 */
-	public void mergeLogFiles(DrugResponseAnalyzer dra, String logDirectory) {
+	private void mergeLogFiles(DrugResponseAnalyzer dra, String logDirectory) {
 		String mergedLogFilename = new File(logDirectory, appName + "_simulations.log").getAbsolutePath();
 		try {
 			mergeFiles(dra.simulationFileList, mergedLogFilename);
@@ -310,15 +308,16 @@ public class Drabme implements Runnable {
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
-			String individualresponses = "";
+			StringBuilder individualResponses = new StringBuilder();
 			float[] predictions = perturbation.getPredictions();
-			for (int j = 0; j < predictions.length; j++) {
-				individualresponses += "\t" + predictions[j];
+			for(float prediction : predictions) {
+				String str = "\t" + prediction;
+				individualResponses.append(str);
 			}
 
 			logger.outputStringMessageToFile(filename,
 					perturbation.getName() + "\t" + perturbation.getAveragePredictedResponse() + "\t"
-							+ perturbation.getStandardDeviationPredictedResponse() + individualresponses);
+							+ perturbation.getStandardDeviationPredictedResponse() + individualResponses);
 		}
 
 	}
@@ -326,19 +325,19 @@ public class Drabme implements Runnable {
 	private PerturbationPanel loadPerturbationPanel(DrugPanel drugPanel) {
 		logger.outputHeader(2, "Defining perturbations");
 
-		Drug[][] drugperturbations = null;
+		Drug[][] drugPerturbations = null;
 
 		if (filenameCombinations == null) {
-			drugperturbations = drugPanel.getCombinations(combosize);
+			drugPerturbations = drugPanel.getCombinations(combosize);
 		} else {
 			try {
-				drugperturbations = drugPanel.loadCombinationsFromFile(filenameCombinations);
+				drugPerturbations = drugPanel.loadCombinationsFromFile(filenameCombinations);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
-		return new PerturbationPanel(drugperturbations, logger);
+		return new PerturbationPanel(drugPerturbations, logger);
 	}
 
 	private DrugPanel loadDrugPanel(ArrayList<BooleanModel> booleanModels) {
@@ -399,19 +398,17 @@ public class Drabme implements Runnable {
 	}
 
 	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) {
-
 		File[] files = new File(directory).listFiles();
-		File file;
 
-		if (files.length == 0) {
+		if(files == null || files.length == 0) {
 			logger.error("No models are in the model directory. Drabme analysis stops.");
 			System.exit(1);
 		}
-
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].getAbsolutePath().toLowerCase().contains("gitsbe")) {
-				file = files[i];
-				booleanModels.add(new BooleanModel(file.getPath(), logger));
+		else {
+			for (File file : files) {
+				if (file.getAbsolutePath().toLowerCase().contains("gitsbe")) {
+					booleanModels.add(new BooleanModel(file.getPath(), logger));
+				}
 			}
 		}
 	}
