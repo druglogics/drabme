@@ -21,6 +21,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Properties;
 
 /* Drabme - Drug Response Analysis of Boolean Models from Evolution
  * 
@@ -35,12 +36,12 @@ import java.util.Calendar;
  */
 public class Drabme implements Runnable {
 
-	public static String appName = "Drabme";
-	public String version = "v0.13";
+	public static String appName;
+	private static String version;
 
 	private int verbosity;
 
-	String nameProject;
+	private String nameProject;
 
 	private String filenameDrugs;
 	private String filenameCombinations;
@@ -75,6 +76,8 @@ public class Drabme implements Runnable {
 
 	@Override
 	public void run() {
+
+        loadDrabmeProperties();
 
 		System.out.print("Welcome to " + appName + " " + version + "\n\n");
 
@@ -125,7 +128,19 @@ public class Drabme implements Runnable {
 		closeLogger(timer);
 	}
 
-	/**
+    private void loadDrabmeProperties() {
+        final Properties properties = new Properties();
+        try {
+            properties.load(this.getClass().getClassLoader().getResourceAsStream("drabme.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        version = properties.getProperty("version");
+        appName = properties.getProperty("appName");
+    }
+
+    /**
 	 * Each model's predicted synergies, non-synergies and NA results for each drug
 	 * combination tested
 	 * 
@@ -189,7 +204,7 @@ public class Drabme implements Runnable {
 	 * Merges all Drabme simulation logging files into one
 	 */
 	public void mergeLogFiles(DrugResponseAnalyzer dra, String logDirectory) {
-		String mergedLogFilename = new File(logDirectory, "Drabme_simulations_log.txt").getAbsolutePath();
+		String mergedLogFilename = new File(logDirectory, appName + "_simulations_log.txt").getAbsolutePath();
 		try {
 			mergeFiles(dra.simulationFileList, mergedLogFilename);
 		} catch (IOException e) {
@@ -323,8 +338,7 @@ public class Drabme implements Runnable {
 			}
 		}
 
-		PerturbationPanel perturbationPanel = new PerturbationPanel(drugperturbations, logger);
-		return perturbationPanel;
+		return new PerturbationPanel(drugperturbations, logger);
 	}
 
 	private DrugPanel loadDrugPanel(ArrayList<BooleanModel> booleanModels) {

@@ -48,7 +48,7 @@ public class DrugResponseAnalyzer {
 
 	private void runSimulation(int modelIndex) throws IOException {
 		String modelName = booleanModels.get(modelIndex).getModelName();
-		String filenameOutput = Drabme.appName + modelName.substring(modelName.lastIndexOf("_run_")) + "_log.txt";
+		String filenameOutput = Drabme.appName + modelName.substring(modelName.lastIndexOf("_run_")) + ".txt";
 
 		addFileToSimulationFileList(new File(logDirectory, filenameOutput).getAbsolutePath());
 
@@ -76,7 +76,7 @@ public class DrugResponseAnalyzer {
 	synchronized private void addFileToSimulationFileList(String filename) {
 		simulationFileList.add(filename);
 	}
-
+	
 	synchronized private void addModelPredictionsToList(ModelPredictions modelPredictions) {
 		modelPredictionsList.add(modelPredictions);
 	}

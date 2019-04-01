@@ -124,8 +124,7 @@ public class DrugPanel {
 	/**
 	 * Adds warnings to the log if there are drug targets not defined in the
 	 * model/network topology
-	 * 
-	 * @param drugPanel
+	 *
 	 * @param booleanModels
 	 * @throws Exception
 	 */

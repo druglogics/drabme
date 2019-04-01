@@ -62,7 +62,7 @@ public class ModelPredictions {
 		return result;
 	}
 
-	public String getModelName() {
+	private String getModelName() {
 		return modelName;
 	}
 
