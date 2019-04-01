@@ -125,7 +125,7 @@ public class Drabme implements Runnable {
 		timer.stopTimer();
 		logger.outputHeader(1, "\nThe end");
 
-		closeLogger(timer);
+		logger.writeLastLoggingMessage(timer);
 	}
 
     private void loadDrabmeProperties() {
@@ -368,11 +368,7 @@ public class Drabme implements Runnable {
 	private void loadModels(ArrayList<BooleanModel> booleanModels) {
 		logger.outputHeader(2, "Loading Boolean models");
 
-		try {
-			this.loadBooleanModels(directoryModels, booleanModels);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		this.loadBooleanModels(directoryModels, booleanModels);
 	}
 
 	private ModelOutputs loadModelOutputs(ArrayList<BooleanModel> booleanModels) {
@@ -402,17 +398,7 @@ public class Drabme implements Runnable {
 		return outputs;
 	}
 
-	private void closeLogger(Timer timer) {
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Calendar calendarData = Calendar.getInstance();
-		logger.outputStringMessage(1, "End: " + dateFormat.format(calendarData.getTime()));
-		logger.outputStringMessage(1, "Analysis completed in " + timer.getHoursOfDuration() + " hours, "
-				+ timer.getMinutesOfDuration() + " minutes, and " + timer.getSecondsOfDuration() + " seconds ");
-		logger.outputStringMessage(1, "\nWith that we say thank you and good bye!");
-		logger.finish();
-	}
-
-	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) throws IOException {
+	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) {
 
 		File[] files = new File(directory).listFiles();
 		File file;
@@ -439,9 +425,6 @@ public class Drabme implements Runnable {
 			System.exit(1);
 		}
 
-		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-		Calendar calendarData = Calendar.getInstance();
-		logger.outputHeader(1, appName + " " + version);
-		logger.outputStringMessage(1, "Start: " + dateFormat.format(calendarData.getTime()));
+		logger.writeFirstLoggingMessage(appName, version);
 	}
 }
