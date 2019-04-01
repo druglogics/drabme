@@ -204,7 +204,7 @@ public class Drabme implements Runnable {
 	 * Merges all Drabme simulation logging files into one
 	 */
 	public void mergeLogFiles(DrugResponseAnalyzer dra, String logDirectory) {
-		String mergedLogFilename = new File(logDirectory, appName + "_simulations_log.txt").getAbsolutePath();
+		String mergedLogFilename = new File(logDirectory, appName + "_simulations.log").getAbsolutePath();
 		try {
 			mergeFiles(dra.simulationFileList, mergedLogFilename);
 		} catch (IOException e) {
@@ -432,7 +432,7 @@ public class Drabme implements Runnable {
 
 	private void initializeDrabmeLogger(String directory) {
 		try {
-			String filenameOutput = appName + "_" + nameProject + "_log.txt";
+			String filenameOutput = appName + "_" + nameProject + ".log";
 			logger = new Logger(filenameOutput, directory, verbosity, true);
 		} catch (IOException e) {
 			e.printStackTrace();
