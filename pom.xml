@@ -59,6 +59,50 @@
         </resources>
     </build>
 
+    <profiles>
+        <profile>
+            <id>runExampleAGS</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>eu.druglogics.drabme.Launcher</mainClass>
+                                    <arguments>
+                                        <argument>--project</argument>
+                                        <argument>example_run_ags</argument>
+                                        <argument>--modelsDir</argument>
+                                        <argument>example_run_ags/models</argument>
+                                        <argument>--drugs</argument>
+                                        <argument>example_run_ags/toy_ags_drugpanel.tab</argument>
+                                        <argument>--perturbations</argument>
+                                        <argument>example_run_ags/toy_ags_perturbations.tab</argument>
+                                        <argument>--config</argument>
+                                        <argument>example_run_ags/toy_ags_config.tab</argument>
+                                        <argument>--modeloutputs</argument>
+                                        <argument>example_run_ags/toy_ags_modeloutputs.tab</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>com.test.Startup</mainClass>
+                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencies>
         <!-- Gitsbe -->
         <dependency>
