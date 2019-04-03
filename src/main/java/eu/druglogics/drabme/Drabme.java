@@ -6,6 +6,7 @@ import eu.druglogics.drabme.drug.DrugResponseAnalyzer;
 import eu.druglogics.drabme.perturbation.ModelPredictions;
 import eu.druglogics.drabme.perturbation.Perturbation;
 import eu.druglogics.drabme.perturbation.PerturbationPanel;
+import eu.druglogics.gitsbe.input.Config;
 import eu.druglogics.gitsbe.util.Logger;
 import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.util.Timer;
@@ -36,39 +37,31 @@ public class Drabme implements Runnable {
 	public static String appName;
 	private static String version;
 
-	private int verbosity;
-
-	private String nameProject;
-
+	private String projectName;
 	private String filenameDrugs;
-	private String filenameCombinations;
+	private String filenamePerturbations;
 	private String filenameModelOutputs;
+	private String filenameConfig;
 	private String directoryModels;
-	private String directoryTmp;
 	private String directoryOutput;
-	private boolean preserveTmpFiles;
-
-	private int combosize;
+	private String directoryTmp;
 
 	private Logger logger;
 
-	public Drabme(int verbosity, String nameProject, String directoryModels, String filenameDrugs,
-			String filenameCombinations, String filenameModelOutputs, String directoryOutput, String directoryTmp,
-			boolean preserveTmpFiles, int combosize) {
+	public Drabme(String projectName, String filenameDrugs,
+				  String filenamePerturbations, String filenameModelOutputs,
+				  String filenameConfig, String directoryModels,
+				  String directoryOutput, String directoryTmp) {
 
 		// Set variables
-		this.nameProject = nameProject;
+		this.projectName = projectName;
 		this.filenameDrugs = filenameDrugs;
+		this.filenamePerturbations = filenamePerturbations;
 		this.filenameModelOutputs = filenameModelOutputs;
+		this.filenameConfig = filenameConfig;
 		this.directoryModels = directoryModels;
 		this.directoryOutput = directoryOutput;
 		this.directoryTmp = directoryTmp;
-		this.preserveTmpFiles = preserveTmpFiles;
-		this.combosize = combosize;
-		this.verbosity = verbosity;
-
-		if (filenameCombinations.length() > 0)
-			this.filenameCombinations = filenameCombinations;
 	}
 
 	@Override
@@ -78,12 +71,19 @@ public class Drabme implements Runnable {
 
 		System.out.print("Welcome to " + appName + " " + version + "\n\n");
 
-		// Initialize logger
+		createOutputDirectory();
+
 		String logDirectory = new File(directoryOutput, "log").getAbsolutePath();
+		createLogDirectory(logDirectory);
+
+		// Initialize logger
 		initializeDrabmeLogger(logDirectory);
 
 		// Start timer
 		Timer timer = new Timer();
+
+		// Load config file
+		Config config = loadConfigFile();
 
 		// Load boolean models
 		ArrayList<BooleanModel> booleanModels = new ArrayList<>();
@@ -93,15 +93,14 @@ public class Drabme implements Runnable {
 		DrugPanel drugPanel = loadDrugPanel(booleanModels);
 
 		// Load perturbation panel
-		PerturbationPanel perturbationPanel = loadPerturbationPanel(drugPanel);
+		PerturbationPanel perturbationPanel =
+				loadPerturbationPanel(drugPanel, config);
 
 		// Load output weights
 		ModelOutputs outputs = loadModelOutputs(booleanModels);
 
-		// Create temp directory
-		if (!createDirectory(directoryTmp, logger))
-			return;
-		initializeFileDeleter();
+		createTmpDirectory();
+		activateFileDeleter(config);
 
 		// Run simulations and compute Statistics
 		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, directoryTmp,
@@ -125,7 +124,7 @@ public class Drabme implements Runnable {
 		logger.writeLastLoggingMessage(timer);
 	}
 
-    private void loadDrabmeProperties() {
+	private void loadDrabmeProperties() {
         final Properties properties = new Properties();
         try {
             properties.load(this.getClass().getClassLoader().getResourceAsStream("drabme.properties"));
@@ -137,6 +136,30 @@ public class Drabme implements Runnable {
         appName = properties.getProperty("appName");
     }
 
+	private void createOutputDirectory() {
+		try {
+			createDirectory(directoryOutput);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void createLogDirectory(String logDirectory) {
+		try {
+			createDirectory(logDirectory);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void createTmpDirectory() {
+		try {
+			createDirectory(directoryTmp, logger);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
     /**
 	 * Each model's predicted synergies, non-synergies and NA results for each drug
 	 * combination tested
@@ -146,7 +169,7 @@ public class Drabme implements Runnable {
 	 */
 	private void generateModelPredictions(ArrayList<ModelPredictions> modelPredictionsList,
 			PerturbationPanel perturbationPanel) {
-		String filename = new File(directoryOutput, "output_" + nameProject + "_model_predictions.tab")
+		String filename = new File(directoryOutput, projectName + "_model_predictions.tab")
 				.getAbsolutePath();
 
 		ArrayList<String> drugCombinationsList = getDrugCombinationsList(perturbationPanel);
@@ -185,9 +208,9 @@ public class Drabme implements Runnable {
 		return drugCombinationsList;
 	}
 
-	private void initializeFileDeleter() {
+	private void activateFileDeleter(Config config) {
 		FileDeleter fileDeleter = new FileDeleter(directoryTmp);
-		if (!preserveTmpFiles) {
+		if (config.deleteTmpDir()) {
 			fileDeleter.activate();
 		}
 	}
@@ -219,7 +242,7 @@ public class Drabme implements Runnable {
 	 */
 	private void generateEnsembleWiseSynergies(PerturbationPanel perturbationPanel) {
 		// File to store excess effects over agerage responses in
-		String filename = new File(directoryOutput, "output_" + nameProject + "_ensemblewise_synergies.tab")
+		String filename = new File(directoryOutput, projectName + "_ensemblewise_synergies.tab")
 				.getAbsolutePath();
 
 		logger.outputHeader(1, "Combinatorial response in excess over subsets (ensemble-wise synergy)");
@@ -242,7 +265,7 @@ public class Drabme implements Runnable {
 	 */
 	private void generateEnsembleWiseResponses(PerturbationPanel perturbationPanel) {
 		// File to store average responses in
-		String filename = new File(directoryOutput, "output_" + nameProject + "_ensemblewise_responses.tab")
+		String filename = new File(directoryOutput, projectName + "_ensemblewise_responses.tab")
 				.getAbsolutePath();
 
 		logger.outputHeader(1, "Ensemble average responses");
@@ -265,7 +288,7 @@ public class Drabme implements Runnable {
 	private void generateModelWiseSynergies(PerturbationPanel perturbationPanel,
 			ArrayList<BooleanModel> booleanModels) {
 		// File to store drug synergies in
-		String filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_synergies.tab")
+		String filename = new File(directoryOutput, projectName + "_modelwise_synergies.tab")
 				.getAbsolutePath();
 
 		logger.outputHeader(1, "Synergies vs Non-synergies per perturbation");
@@ -299,7 +322,7 @@ public class Drabme implements Runnable {
 	 */
 	private void generateModelWiseResponses(PerturbationPanel perturbationPanel) {
 		// File to store perturbation responses
-		String filename = new File(directoryOutput, "output_" + nameProject + "_modelwise_responses.tab")
+		String filename = new File(directoryOutput, projectName + "_modelwise_responses.tab")
 				.getAbsolutePath();
 
 		logger.outputHeader(1, "Drug perturbation responses");
@@ -322,16 +345,16 @@ public class Drabme implements Runnable {
 
 	}
 
-	private PerturbationPanel loadPerturbationPanel(DrugPanel drugPanel) {
+	private PerturbationPanel loadPerturbationPanel(DrugPanel drugPanel, Config config) {
 		logger.outputHeader(2, "Defining perturbations");
 
 		Drug[][] drugPerturbations = null;
 
-		if (filenameCombinations == null) {
-			drugPerturbations = drugPanel.getCombinations(combosize);
+		if (filenamePerturbations == null) {
+			drugPerturbations = drugPanel.getCombinations(config.getCombinationSize());
 		} else {
 			try {
-				drugPerturbations = drugPanel.loadCombinationsFromFile(filenameCombinations);
+				drugPerturbations = drugPanel.loadCombinationsFromFile(filenamePerturbations);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -397,6 +420,33 @@ public class Drabme implements Runnable {
 		return outputs;
 	}
 
+	private Config loadConfigFile() {
+		Config config = null;
+		try {
+			config = new Config(filenameConfig, logger);
+		} catch (IOException e) {
+			e.printStackTrace();
+			File file = new File(directoryOutput);
+			filenameConfig = file.getParent() + "/" + "config.tab";
+			logger.outputStringMessage(1, "Cannot find config " +
+					"file, generating template file: " + filenameConfig);
+			try {
+				Config.writeConfigFileTemplate(filenameConfig);
+				config = new Config(filenameConfig, logger);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+				System.exit(1);
+			}
+		}
+
+		int verbosity = config.getVerbosity();
+		// Now that we got the verbosity from the config, we can re-set it in the logger
+		logger.setVerbosity(verbosity);
+		logger.outputHeader(1, "Config options");
+		logger.outputLines(1, config.getConfig());
+		return config;
+	}
+
 	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) {
 		File[] files = new File(directory).listFiles();
 
@@ -415,8 +465,8 @@ public class Drabme implements Runnable {
 
 	private void initializeDrabmeLogger(String directory) {
 		try {
-			String filenameOutput = appName + "_" + nameProject + ".log";
-			logger = new Logger(filenameOutput, directory, verbosity, true);
+			String filenameOutput = appName + "_" + projectName + ".log";
+			logger = new Logger(filenameOutput, directory, 3, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
