@@ -28,9 +28,10 @@ import java.util.Properties;
  * email: asmund.flobak@ntnu.no
  * 
  * Uses bnet_reduction (BNReduction.sh) by Veliz-Cuba
- * A. Veliz-Cuba, B. Aguilar, F. Hinkelmann and R. Laubenbacher. Steady state analysis of Boolean molecular network models via model reduction and computational algebra. BMC Bioinformatics, 2014.
- * 
- * 
+ * A. Veliz-Cuba, B. Aguilar, F. Hinkelmann and R. Laubenbacher.
+ * Steady state analysis of Boolean molecular network models via model
+ * reduction and computational algebra. BMC Bioinformatics, 2014.
+ *
  */
 public class Drabme implements Runnable {
 
@@ -103,8 +104,9 @@ public class Drabme implements Runnable {
 		activateFileDeleter(config);
 
 		// Run simulations and compute Statistics
-		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel, booleanModels, outputs, directoryTmp,
-				logger, logDirectory);
+		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(
+				perturbationPanel, booleanModels, outputs, directoryTmp, logger, logDirectory
+		);
 		runDrugResponseAnalyzer(dra, logDirectory);
 
 		// Generate Summary Reports for Drabme
@@ -127,7 +129,8 @@ public class Drabme implements Runnable {
 	private void loadDrabmeProperties() {
         final Properties properties = new Properties();
         try {
-            properties.load(this.getClass().getClassLoader().getResourceAsStream("drabme.properties"));
+            properties.load(this.getClass().getClassLoader()
+								.getResourceAsStream("drabme.properties"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -184,7 +187,8 @@ public class Drabme implements Runnable {
 		logger.outputStringMessageToFile(filename, headerString.toString());
 
 		for (ModelPredictions modelPredictions : modelPredictionsList) {
-			String modelPredictionsString = modelPredictions.getModelPredictionsVerbose(drugCombinationsList);
+			String modelPredictionsString =
+					modelPredictions.getModelPredictionsVerbose(drugCombinationsList);
 			logger.outputStringMessageToFile(filename, modelPredictionsString);
 		}
 	}
@@ -225,7 +229,8 @@ public class Drabme implements Runnable {
 	 * Merges all Drabme simulation logging files into one
 	 */
 	private void mergeLogFiles(DrugResponseAnalyzer dra, String logDirectory) {
-		String mergedLogFilename = new File(logDirectory, appName + "_simulations.log").getAbsolutePath();
+		String mergedLogFilename =
+				new File(logDirectory, appName + "_simulations.log").getAbsolutePath();
 		try {
 			mergeFiles(dra.simulationFileList, mergedLogFilename);
 		} catch (IOException e) {
@@ -292,22 +297,23 @@ public class Drabme implements Runnable {
 				.getAbsolutePath();
 
 		logger.outputHeader(1, "Synergies vs Non-synergies per perturbation");
-		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Synergies" + "\t" + "Non-synergies");
+		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Synergies"
+																	   + "\t" + "Non-synergies");
 
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
 			if (perturbation.getDrugs().length >= 2) {
 				logger.outputStringMessageToFile(filename, perturbation.getName() + "\t"
-						+ perturbation.getSynergyPredictions() + "\t" + perturbation.getNonSynergyPredictions());
+						+ perturbation.getSynergyPredictions() + "\t"
+						+ perturbation.getNonSynergyPredictions());
 			}
 
-			// if synergies + non-synergies for one combination exceeds number of models
-			// then there is an error
-			// in storing synergies, previously happened due to bug in hash generation for
-			// drugs
-			if ((perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions()) > booleanModels
-					.size()) {
+			// if synergies + non-synergies for one combination exceeds the number of models
+			// then there is an error in storing the synergies, previously happened due to a
+			// bug in hash generation for drugs
+			if ((perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions())
+					> booleanModels.size()) {
 				logger.error("Synergy and non-synergy count error: "
 						+ perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions());
 				abort();
@@ -326,7 +332,8 @@ public class Drabme implements Runnable {
 				.getAbsolutePath();
 
 		logger.outputHeader(1, "Drug perturbation responses");
-		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Average" + "\t" + "SD" + "\t" + "Data");
+		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Average"
+													     + "\t" + "SD" + "\t" + "Data");
 
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
@@ -338,11 +345,11 @@ public class Drabme implements Runnable {
 				individualResponses.append(str);
 			}
 
-			logger.outputStringMessageToFile(filename,
-					perturbation.getName() + "\t" + perturbation.getAveragePredictedResponse() + "\t"
-							+ perturbation.getStandardDeviationPredictedResponse() + individualResponses);
+			logger.outputStringMessageToFile(filename,perturbation.getName() + "\t"
+					+ perturbation.getAveragePredictedResponse() + "\t"
+					+ perturbation.getStandardDeviationPredictedResponse()
+					+ individualResponses);
 		}
-
 	}
 
 	private PerturbationPanel loadPerturbationPanel(DrugPanel drugPanel, Config config) {
@@ -372,7 +379,8 @@ public class Drabme implements Runnable {
 			e.printStackTrace();
 			File file = new File(directoryOutput);
 			filenameDrugs = file.getParent() + "/" + "drugpanel.tab";
-			logger.outputStringMessage(1, "Cannot find drugpanel file, generating template file: " + filenameDrugs);
+			logger.outputStringMessage(1, "Cannot find drugpanel file, generating template file: "
+					+ filenameDrugs);
 			try {
 				DrugPanel.writeDrugPanelFileTemplate(filenameDrugs);
 				drugPanel = new DrugPanel(filenameDrugs, logger);
@@ -402,7 +410,8 @@ public class Drabme implements Runnable {
 			File file = new File(directoryOutput);
 			filenameModelOutputs = file.getParent() + "/" + "modeloutputs.tab";
 			logger.outputStringMessage(1,
-					"Couldn't load model outputs file, generating template file: " + filenameModelOutputs);
+					"Couldn't load model outputs file, generating template file: "
+							+ filenameModelOutputs);
 			try {
 				ModelOutputs.saveModelOutputsFileTemplate(filenameModelOutputs);
 				outputs = new ModelOutputs(filenameModelOutputs, logger);

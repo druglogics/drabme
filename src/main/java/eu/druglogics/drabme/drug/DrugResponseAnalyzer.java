@@ -32,8 +32,8 @@ public class DrugResponseAnalyzer {
 		this.directoryTmp = directoryTmp;
 		this.logger = logger;
 		this.logDirectory = logDirectory;
-		this.simulationFileList = new ArrayList<String>();
-		this.modelPredictionsList = new ArrayList<ModelPredictions>();
+		this.simulationFileList = new ArrayList<>();
+		this.modelPredictionsList = new ArrayList<>();
 	}
 
 	public void analyze() {
@@ -56,8 +56,9 @@ public class DrugResponseAnalyzer {
 		Logger simulation_logger = new Logger(filenameOutput, logDirectory, logger.getVerbosity(), true);
 		simulation_logger.outputHeader(2, "Adding model " + modelName);
 
-		ResponseModel responseModel = new ResponseModel(booleanModels.get(modelIndex), modelOutputs, perturbationPanel,
-				simulation_logger);
+		ResponseModel responseModel =
+				new ResponseModel(booleanModels.get(modelIndex), modelOutputs,
+						          perturbationPanel, simulation_logger);
 		responseModel.initializeResponseModel();
 		responseModel.simulateResponses(directoryTmp);
 

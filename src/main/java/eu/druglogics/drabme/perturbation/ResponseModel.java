@@ -30,8 +30,8 @@ public class ResponseModel {
 	private ArrayList<PerturbationModel> perturbationModels; // Set of boolean models extended with perturbations
 	private ModelPredictions modelPredictions;
 
-	public ResponseModel(BooleanModel booleanModel, ModelOutputs modelOutputs, PerturbationPanel perturbationPanel,
-			Logger logger) {
+	public ResponseModel(BooleanModel booleanModel, ModelOutputs modelOutputs,
+						 PerturbationPanel perturbationPanel, Logger logger) {
 		this.originalModel = booleanModel;
 		this.modelOutputs = modelOutputs;
 		this.perturbationPanel = perturbationPanel;
@@ -40,27 +40,27 @@ public class ResponseModel {
 		this.modelPredictions = new ModelPredictions(originalModel.getModelName());
 	}
 
-	public String getModelName() {
+	private String getModelName() {
 		return this.modelName;
 	}
 
 	public void initializeResponseModel() {
 		logger.outputStringMessage(2, "Initializing response model: " + this.getModelName() + "\n");
-		perturbationModels = new ArrayList<PerturbationModel>();
+		perturbationModels = new ArrayList<>();
 
 		// Define model for each perturbation set
 		for (int index = 0; index < perturbationPanel.getNumberOfPerturbations(); index++) {
-			perturbationModels.add(new PerturbationModel(originalModel, perturbationPanel.getPerturbations()[index],
-					modelOutputs, logger));
+			perturbationModels.add(new PerturbationModel(
+					originalModel, perturbationPanel.getPerturbations()[index], modelOutputs, logger
+			));
 		}
 	}
 
 	public void simulateResponses(String directoryTmp) throws IOException {
 
-		for (int i = 0; i < perturbationModels.size(); i++) {
+		for (PerturbationModel perturbationModel : perturbationModels) {
 			logger.outputStringMessage(2, ""); // Add blank line for better visualization of results
 
-			PerturbationModel perturbationModel = perturbationModels.get(i);
 			Perturbation perturbation = perturbationModel.getPerturbation();
 
 			// Calculate stable state(s), then determine global output
@@ -69,8 +69,8 @@ public class ResponseModel {
 
 			// Store response for perturbation set
 			if (perturbationModel.hasGlobalOutput()) {
-				logger.outputStringMessage(2, "Adding predicted response for perturbation " + perturbation.getName()
-						+ ": " + perturbationModel.getGlobalOutput());
+				logger.outputStringMessage(2, "Adding predicted response for perturbation "
+						+ perturbation.getName() + ": " + perturbationModel.getGlobalOutput());
 				perturbation.addPrediction(perturbationModel.getGlobalOutput());
 			}
 
@@ -81,7 +81,7 @@ public class ResponseModel {
 		}
 	}
 
-	public void checkCombinationSynergy(Drug[] combination) {
+	private void checkCombinationSynergy(Drug[] combination) {
 
 		if (combination.length == 2)
 			logger.debug("Combination: " + combination[0].getName() + " " + combination[1].getName());
@@ -95,8 +95,8 @@ public class ResponseModel {
 		Drug[][] subsets = DrugPanel.getCombinationSubsets(combination);
 		String drugCombination = PerturbationPanel.getCombinationName(combination);
 
-		for (int i = 0; i < subsets.length; i++) {
-			logger.debug("Combination subsets:" + PerturbationPanel.getCombinationName(subsets[i]));
+		for (Drug[] subset : subsets) {
+			logger.debug("Combination subsets:" + PerturbationPanel.getCombinationName(subset));
 		}
 
 		boolean computable = true;
@@ -105,19 +105,20 @@ public class ResponseModel {
 		if (!combinationResponse.hasGlobalOutput())
 			computable = false;
 
-		for (int i = 0; i < subsets.length; i++) {
-			if (!perturbationModels.get(getIndexOfPerturbationModel(subsets[i])).hasGlobalOutput())
+		for (Drug[] subset : subsets) {
+			if (!perturbationModels.get(getIndexOfPerturbationModel(subset)).hasGlobalOutput())
 				computable = false;
 		}
 
 		if (computable) {
-			float minimumGlobalOutput = perturbationModels.get(getIndexOfPerturbationModel(subsets[0]))
-					.getGlobalOutput();
+			float minimumGlobalOutput =
+					perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
 
 			// find the subset with the minimum global output
-			for (int i = 0; i < subsets.length; i++) {
-				int index = getIndexOfPerturbationModel(subsets[i]);
-				minimumGlobalOutput = min(minimumGlobalOutput, perturbationModels.get(index).getGlobalOutput());
+			for (Drug[] subset : subsets) {
+				int index = getIndexOfPerturbationModel(subset);
+				minimumGlobalOutput =
+						min(minimumGlobalOutput, perturbationModels.get(index).getGlobalOutput());
 			}
 
 			if (combinationResponse.getGlobalOutput() < minimumGlobalOutput) {

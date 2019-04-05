@@ -32,8 +32,7 @@ public class PerturbationPanel {
 	private int getIndexOfPerturbation(Drug[] drugs) {
 		int index = -1;
 
-		int hashA = 0;
-		int hashB = 0;
+		int hashA, hashB;
 
 		hashA = DrugPanel.getDrugSetHash(drugs);
 
@@ -57,17 +56,17 @@ public class PerturbationPanel {
 
 	/**
 	 * Returns an array of perturbations that have specific number of drugs
-	 * (combinationsize)
+	 * (combinationSize)
 	 * 
-	 * @param size
+	 * @param combinationSize
 	 * @return
 	 */
-	public Perturbation[] getPerturbations(int combinationsize) {
-		ArrayList<Perturbation> result = new ArrayList<Perturbation>();
+	private Perturbation[] getPerturbations(int combinationSize) {
+		ArrayList<Perturbation> result = new ArrayList<>();
 
-		for (int i = 0; i < perturbations.length; i++) {
-			if (perturbations[i].getDrugs().length == combinationsize) {
-				result.add(perturbations[i]);
+		for (Perturbation perturbation : perturbations) {
+			if (perturbation.getDrugs().length == combinationSize) {
+				result.add(perturbation);
 			}
 		}
 
@@ -85,11 +84,11 @@ public class PerturbationPanel {
 	 * @param size
 	 * @return
 	 */
-	public int getNumberOfPerturbations(int size) {
+	private int getNumberOfPerturbations(int size) {
 		int result = 0;
 
-		for (int i = 0; i < perturbations.length; i++) {
-			if (perturbations[i].getDrugs().length == size) {
+		for (Perturbation perturbation : perturbations) {
+			if (perturbation.getDrugs().length == size) {
 				result++;
 			}
 		}
@@ -101,7 +100,7 @@ public class PerturbationPanel {
 		double response = perturbation.getAveragePredictedResponse();
 
 		Drug[][] subsets = DrugPanel.getCombinationSubsets(perturbation.getDrugs());
-		int indexSubset[] = new int[subsets.length];
+		int[] indexSubset = new int[subsets.length];
 
 		for (int i = 0; i < subsets.length; i++) {
 			indexSubset[i] = getIndexOfPerturbation(subsets[i]);
@@ -127,10 +126,10 @@ public class PerturbationPanel {
 			return 0.0;
 	}
 
-	public double[] getPredictedAverageCombinationResponses(int combinationsize) {
-		double[] responses = new double[getNumberOfPerturbations(combinationsize)];
+	public double[] getPredictedAverageCombinationResponses(int combinationSize) {
+		double[] responses = new double[getNumberOfPerturbations(combinationSize)];
 
-		Perturbation[] subset = this.getPerturbations(combinationsize);
+		Perturbation[] subset = this.getPerturbations(combinationSize);
 
 		for (int i = 0; i < responses.length; i++) {
 			responses[i] = getPredictedAverageCombinationResponse(subset[i]);
@@ -146,7 +145,7 @@ public class PerturbationPanel {
 	 * @param combinations
 	 * @return name of drug combination
 	 */
-	public String[] getCombinationNames(Drug[][] combinations) {
+	private String[] getCombinationNames(Drug[][] combinations) {
 		String[] names = new String[combinations.length];
 
 		for (int i = 0; i < combinations.length; i++) {
@@ -173,17 +172,16 @@ public class PerturbationPanel {
 		return getCombinationName(names);
 	}
 
-	public static String getCombinationName(String[] combination) {
-		String namecombo = "[";
+	private static String getCombinationName(String[] combination) {
+		StringBuilder comboName = new StringBuilder("[");
 		for (int i = 0; i < combination.length; i++) {
 			if (i > 0)
-				namecombo += "]-[";
-
-			namecombo += combination[i];
+				comboName.append("]-[");
+			comboName.append(combination[i]);
 		}
-		namecombo += "]";
+		comboName.append("]");
 
-		return namecombo;
+		return comboName.toString();
 	}
 
 }

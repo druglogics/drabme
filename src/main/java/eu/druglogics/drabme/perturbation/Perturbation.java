@@ -16,9 +16,8 @@ public class Perturbation {
 	private int predictedSynergies;
 	private int predictedNonSynergies;
 
-	public double mean;
-	public double sd;
-	public double var;
+	private double mean;
+	private double sd;
 
 	private boolean isStatisticsCalculated = false;
 
@@ -28,27 +27,27 @@ public class Perturbation {
 
 		this.logger = logger;
 		drugs = perturbation;
-		predictedResponses = new ArrayList<Float>();
+		predictedResponses = new ArrayList<>();
 
 		predictedSynergies = 0;
 		predictedNonSynergies = 0;
 
 		// Report if any drugs passed are without defined targets
-		for (int i = 0; i < drugs.length; i++) {
-			if (drugs[i].getTargets().size() == 0) {
+		for (Drug drug : drugs) {
+			if (drug.getTargets().size() == 0) {
 				logger.outputStringMessage(2,
-						"Added drug " + drugs[i].getName() + " which has no targets to perturbations");
+						"Added drug " + drug.getName() + " which has no targets to perturbations");
 			}
 		}
 
 		perturbationHash = DrugPanel.getDrugSetHash(drugs);
 	}
 
-	synchronized public void addSynergyPrediction() {
+	synchronized void addSynergyPrediction() {
 		predictedSynergies++;
 	}
 
-	synchronized public void addNonSynergyPrediction() {
+	synchronized void addNonSynergyPrediction() {
 		predictedNonSynergies++;
 	}
 
@@ -60,7 +59,7 @@ public class Perturbation {
 		return predictedNonSynergies;
 	}
 
-	synchronized public void addPrediction(float response) {
+	synchronized void addPrediction(float response) {
 		predictedResponses.add(response);
 	}
 
@@ -72,8 +71,8 @@ public class Perturbation {
 		float responseSum = 0;
 		int numPredictions = predictedResponses.size();
 
-		for (int i = 0; i < numPredictions; i++) {
-			responseSum += predictedResponses.get(i);
+		for (Float predictedResponse : predictedResponses) {
+			responseSum += predictedResponse;
 		}
 
 		double mean = 0;
@@ -84,8 +83,7 @@ public class Perturbation {
 			mean = (double) responseSum / (double) numPredictions;
 
 			if (numPredictions > 1) {
-				for (int i = 0; i < numPredictions; i++) {
-					float prediction = predictedResponses.get(i);
+				for (float prediction : predictedResponses) {
 					var += (prediction - mean) * (prediction - mean);
 				}
 				sd = Math.sqrt(var / (numPredictions - 1));
@@ -93,12 +91,11 @@ public class Perturbation {
 		}
 
 		this.mean = mean;
-		this.var = var;
 		this.sd = sd;
 
 		isStatisticsCalculated = true;
-		logger.outputStringMessage(1,
-				"Statistics calculated for perturbation: " + PerturbationPanel.getCombinationName(drugs));
+		logger.outputStringMessage(1, "Statistics calculated for perturbation: "
+				+ PerturbationPanel.getCombinationName(drugs));
 	}
 
 	public double getAveragePredictedResponse() {
@@ -120,19 +117,22 @@ public class Perturbation {
 		return drugs;
 	}
 
-	public String getDrugsVerbose() {
-		String result = "";
-		for (int i = 0; i < drugs.length; i++) {
-			result += drugs[i].getName() + " ";
+	String getDrugsVerbose() {
+		StringBuilder result = new StringBuilder();
+
+		for (Drug drug : drugs) {
+			String str = drug.getName() + " ";
+			result.append(str);
 		}
-		return result;
+
+		return result.toString();
 	}
 
 	public String getName() {
 		return PerturbationPanel.getCombinationName(drugs);
 	}
 
-	public int getPerturbationHash() {
+	int getPerturbationHash() {
 		return perturbationHash;
 	}
 
@@ -147,7 +147,7 @@ public class Perturbation {
 		int[] result = new int[integers.size()];
 		Iterator<Integer> iterator = integers.iterator();
 		for (int i = 0; i < result.length; i++) {
-			result[i] = iterator.next().intValue();
+			result[i] = iterator.next();
 		}
 		return result;
 	}
@@ -162,10 +162,9 @@ public class Perturbation {
 		float[] result = new float[floats.size()];
 		Iterator<Float> iterator = floats.iterator();
 		for (int i = 0; i < result.length; i++) {
-			result[i] = iterator.next().floatValue();
+			result[i] = iterator.next();
 		}
 		return result;
 	}
 
-	
 }

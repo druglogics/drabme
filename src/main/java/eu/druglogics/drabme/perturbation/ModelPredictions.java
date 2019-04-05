@@ -17,31 +17,32 @@ public class ModelPredictions {
 	private String modelName;
 	private Map<String, String> drugPredictions;
 
-	public ModelPredictions(String modelName) {
+	ModelPredictions(String modelName) {
 		this.modelName = modelName;
-		drugPredictions = new HashMap<String, String>();
+		drugPredictions = new HashMap<>();
 	}
 
-	public void addSynergyPrediction(String drugCombination) {
+	void addSynergyPrediction(String drugCombination) {
 		drugPredictions.put(drugCombination, "1");
 	}
 
-	public void addNonSynergyPrediction(String drugCombination) {
+	void addNonSynergyPrediction(String drugCombination) {
 		drugPredictions.put(drugCombination, "0");
 	}
 
-	public void addNAPrediction(String drugCombination) {
+	void addNAPrediction(String drugCombination) {
 		drugPredictions.put(drugCombination, "NA");
 	}
 
 	public String getPredictions() {
-		String result = "";
+		StringBuilder result = new StringBuilder();
 
 		for (Map.Entry<String, String> entry : drugPredictions.entrySet()) {
-			result += "Drugs: " + entry.getKey() + "  Prediction: " + entry.getValue() + "\n";
+			String str = "Drugs: " + entry.getKey() + "  Prediction: " + entry.getValue() + "\n";
+			result.append(str);
 		}
 
-		return result;
+		return result.toString();
 	}
 
 	/**
@@ -53,13 +54,14 @@ public class ModelPredictions {
 	 * @return
 	 */
 	public String getModelPredictionsVerbose(ArrayList<String> drugCombinationsList) {
-		String result = getModelName();
+		StringBuilder result = new StringBuilder(getModelName());
 
 		for (String drugCombination : drugCombinationsList) {
-			result += "\t" + drugPredictions.get(drugCombination);
+			String str = "\t" + drugPredictions.get(drugCombination);
+			result.append(str);
 		}
 
-		return result;
+		return result.toString();
 	}
 
 	private String getModelName() {

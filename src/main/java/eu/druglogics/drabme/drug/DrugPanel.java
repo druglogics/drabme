@@ -24,19 +24,19 @@ public class DrugPanel {
 
 	public DrugPanel(String filename, Logger logger) throws IOException {
 		this.logger = logger;
-		this.drugs = new ArrayList<Drug>();
+		this.drugs = new ArrayList<>();
 		loadDrugsFromFile(filename);
 	}
 
 	/**
 	 * 
-	 * @param name
+	 * @param drugNames
 	 *            array of drugs to be probed
 	 * @return boolean of whether all drugs are in panel or not
 	 */
-	public boolean areDrugsInPanel(String[] name) {
-		for (int i = 0; i < name.length; i++) {
-			if (!isDrugInPanel(name[i]))
+	public boolean areDrugsInPanel(String[] drugNames) {
+		for (String drugName : drugNames) {
+			if (!isDrugInPanel(drugName))
 				return false;
 		}
 		return true;
@@ -48,10 +48,8 @@ public class DrugPanel {
 	 *            of drug probed
 	 * @return boolean of whether drug is in panel or not
 	 */
-	public boolean isDrugInPanel(String name) {
-		if (getIndexOfDrug(name) >= 0)
-			return true;
-		return false;
+	private boolean isDrugInPanel(String name) {
+		return (getIndexOfDrug(name) >= 0);
 	}
 
 	/**
@@ -80,13 +78,14 @@ public class DrugPanel {
 	 * @throws Exception
 	 *             if drug is not in panel
 	 */
-	public Drug getDrug(String name) throws Exception {
+	private Drug getDrug(String name) throws Exception {
 		int index = getIndexOfDrug(name);
 
 		if (index >= 0) {
 			return drugs.get(index);
 		}
-		throw new Exception("Exception: Drug not found in drug panel. Use function isDrugInPanel (String name)");
+		throw new Exception("Exception: Drug not found in drug panel. "
+				+ "Use function isDrugInPanel (String name)");
 	}
 
 	/**
@@ -95,9 +94,10 @@ public class DrugPanel {
 	 *            storing drugs to be loaded
 	 * @throws IOException
 	 */
-	public void loadDrugsFromFile(String filename) throws IOException {
+	private void loadDrugsFromFile(String filename) throws IOException {
 
-		logger.outputStringMessage(3, "Reading drugpanel file: " + new File(filename).getAbsolutePath());
+		logger.outputStringMessage(3, "Reading drugpanel file: "
+				+ new File(filename).getAbsolutePath());
 		ArrayList<String> lines = readLinesFromFile(filename, true);
 
 		for (int i = 0; i < lines.size(); i++) {
@@ -117,7 +117,9 @@ public class DrugPanel {
 			}
 
 			// Add drug targets
-			drugs.get(i).addTargets(Arrays.copyOfRange(lines.get(i).split("\t"), 2, lines.get(i).split("\t").length));
+			drugs.get(i).addTargets(
+				Arrays.copyOfRange(lines.get(i).split("\t"), 2, lines.get(i).split("\t").length)
+			);
 		}
 	}
 
@@ -137,7 +139,8 @@ public class DrugPanel {
 		for (Drug drug : this.drugs) {
 			for (String target : drug.getTargets()) {
 				if (!nodes.contains(target)) {
-					logger.outputStringMessage(3, "Warning: Target " + target + " not in network file.");
+					logger.outputStringMessage(3, "Warning: Target " + target
+							+ " not in network file.");
 				}
 			}
 		}
@@ -146,19 +149,19 @@ public class DrugPanel {
 	public Drug[][] loadCombinationsFromFile(String filename) throws Exception {
 
 		ArrayList<String> lines = readLinesFromFile(filename, true);
-		ArrayList<Drug[]> perturbations = new ArrayList<Drug[]>();
+		ArrayList<Drug[]> perturbations = new ArrayList<>();
 
-		for (int i = 0; i < lines.size(); i++) {
+		for (String line : lines) {
 
-			int combosize = lines.get(i).split("\t").length;
+			int combosize = line.split("\t").length;
 			Drug[] combination = new Drug[combosize];
 
 			for (int j = 0; j < combosize; j++) {
-				String drugname = lines.get(i).split("\t")[j];
-				if (isDrugInPanel(drugname)) {
-					combination[j] = getDrug(drugname);
+				String drugName = line.split("\t")[j];
+				if (isDrugInPanel(drugName)) {
+					combination[j] = getDrug(drugName);
 				} else {
-					logger.error("Combination refers to drug not in drugpanel: " + drugname);
+					logger.error("Combination refers to drug not in drugpanel: " + drugName);
 					abort();
 				}
 			}
@@ -179,7 +182,7 @@ public class DrugPanel {
 	 * @param perturbations
 	 */
 	private void checkDrugCombinationConsistency(ArrayList<Drug[]> perturbations) {
-		boolean foundSubset = false;
+		boolean foundSubset;
 
 		for (int index = 0; index < perturbations.size(); index++) {
 			Drug[] combination = perturbations.get(index);
@@ -189,9 +192,7 @@ public class DrugPanel {
 				Drug[][] subsets = getCombinationSubsets(combination);
 
 				// for every subset check that there is a defined perturbation in the file
-				for (int j = 0; j < subsets.length; j++) {
-					Drug[] subset = subsets[j];
-
+				for (Drug[] subset : subsets) {
 					foundSubset = false;
 					for (int k = 0; k < index; k++) {
 						logger.debug("Checking subset: " + PerturbationPanel.getCombinationName(subset)
@@ -230,7 +231,8 @@ public class DrugPanel {
 	}
 
 	public Drug[][] getCombinations(int size) {
-		return getCombinations(0, size);
+		int lowerLimit = 0;
+		return getCombinations(lowerLimit, size);
 	}
 
 	/**
@@ -238,14 +240,14 @@ public class DrugPanel {
 	 * @return array of drug arrays, where each drug array is a perturbation
 	 *         condition (set of drugs)
 	 */
-	public Drug[][] getCombinations(int lowerlimit, int upperlimit) {
+	private Drug[][] getCombinations(int lowerLimit, int upperLimit) {
 
-		ArrayList<Drug[]> perturbations = new ArrayList<Drug[]>();
+		ArrayList<Drug[]> perturbations = new ArrayList<>();
 
 		// Add all possible combinations to perturbation set from binomial
 		// distribution (n,k)
 
-		for (int k = lowerlimit; k < (upperlimit + 1); k++) {
+		for (int k = lowerLimit; k < (upperLimit + 1); k++) {
 			// --------------------------------------------------
 			// Next add each drug combination to perturbation set
 			// --------------------------------------------------
@@ -256,7 +258,7 @@ public class DrugPanel {
 			// of the initial vector
 			Generator<Drug> gen = Factory.createSimpleCombinationGenerator(initialVector, k);
 
-			ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<ICombinatoricsVector<Drug>>();
+			ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<>();
 
 			for (ICombinatoricsVector<Drug> combination : gen) {
 				drugs.add(combination);
@@ -285,7 +287,7 @@ public class DrugPanel {
 	 * @return
 	 */
 	public static Drug[][] getCombinationSubsets(Drug[] combination) {
-		ArrayList<Drug[]> subsets = new ArrayList<Drug[]>();
+		ArrayList<Drug[]> subsets = new ArrayList<>();
 
 		int drugsInCombination = combination.length;
 		int drugsInSubset = drugsInCombination - 1;
@@ -296,7 +298,7 @@ public class DrugPanel {
 		// the initial vector
 		Generator<Drug> gen = Factory.createSimpleCombinationGenerator(initialVector, drugsInSubset);
 
-		ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<ICombinatoricsVector<Drug>>();
+		ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<>();
 
 		for (ICombinatoricsVector<Drug> subset : gen) {
 			drugs.add(subset);
@@ -313,7 +315,6 @@ public class DrugPanel {
 		}
 
 		return subsets.toArray(new Drug[0][]);
-
 	}
 
 	/**
@@ -326,11 +327,11 @@ public class DrugPanel {
 	public static int getDrugSetHash(Drug[] drugs) {
 		int hash = 0;
 
-		for (int i = 0; i < drugs.length; i++) {
-			hash += drugs[i].getName().hashCode();
+		for (Drug drug : drugs) {
+			hash += drug.getName().hashCode();
 
-			for (int j = 0; j < drugs[i].getTargets().size(); j++) {
-				hash += drugs[i].getTargets().get(j).hashCode();
+			for (int j = 0; j < drug.getTargets().size(); j++) {
+				hash += drug.getTargets().get(j).hashCode();
 			}
 		}
 
