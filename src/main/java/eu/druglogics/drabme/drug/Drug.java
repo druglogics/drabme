@@ -12,13 +12,11 @@ public class Drug {
 	private Logger logger;
 
 	public Drug(String name, Logger logger) {
-
 		this.logger = logger;
 		logger.outputStringMessage(1, "Added drug " + name);
 
 		this.name = name;
-		targets = new ArrayList<String>();
-
+		targets = new ArrayList<>();
 	}
 
 	/**
@@ -28,9 +26,9 @@ public class Drug {
 	 *            drugs are inhibitors, but some can be modelled as activators, i.e.
 	 *            drugs inducing DNA damage that activates TP53)
 	 */
-	public void addEffect(boolean effect) {
-		String effector = "";
-		if (effect == true)
+	void addEffect(boolean effect) {
+		String effector;
+		if (effect)
 			effector = "activator";
 		else
 			effector = "inhibitor";
@@ -44,23 +42,22 @@ public class Drug {
 		return effect;
 	}
 
-	public void addTargets(String[] targets) {
-		for (int i = 0; i < targets.length; i++) {
-			this.addTarget(targets[i]);
+	void addTargets(String[] targets) {
+		for (String target: targets) {
+			addTarget(target);
 		}
-
 	}
 
-	public void addTarget(String target) {
+	private void addTarget(String target) {
 		logger.outputStringMessage(2, "Added target " + target + " to drug " + name);
 
 		targets.add(target);
 	}
 
-	public void removeTarget(String target) {
+	void removeTarget(String target) {
 		logger.outputStringMessage(2, "Removed target " + target + " from drug " + name);
 
-		targets.remove(targets.indexOf(target));
+		targets.remove(target);
 	}
 
 	public ArrayList<String> getTargets() {
