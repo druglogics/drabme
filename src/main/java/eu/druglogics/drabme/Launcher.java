@@ -19,8 +19,12 @@ public class Launcher {
 	}
 
 	public void start(String[] args) {
-		if (environmentalVariableBNETisNULL())
-			return;
+		try {
+			checkBNET();
+		} catch (Exception e) {
+			e.printStackTrace();
+			abort();
+		}
 		setupInputAndRun(args);
 	}
 
@@ -45,6 +49,8 @@ public class Launcher {
 				projectName = getFileName(directoryInput);
 			}
 
+			directoryModels = makeDirectoryPathAbsolute(directoryModels);
+
 			DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 			String directoryOutput = new File(directoryInput,
 					projectName + "_" + dateFormat.format(Calendar.getInstance().getTime()))
@@ -66,7 +72,7 @@ public class Launcher {
 				thread.join();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-				System.exit(1);
+				abort();
 			}
 		} catch (ParameterException parEx) {
 			System.out.println("\nOptions preceded by an asterisk are required.");

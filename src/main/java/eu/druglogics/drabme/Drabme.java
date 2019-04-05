@@ -310,7 +310,7 @@ public class Drabme implements Runnable {
 					.size()) {
 				logger.error("Synergy and non-synergy count error: "
 						+ perturbation.getSynergyPredictions() + perturbation.getNonSynergyPredictions());
-				System.exit(1);
+				abort();
 			}
 		}
 	}
@@ -378,7 +378,7 @@ public class Drabme implements Runnable {
 				drugPanel = new DrugPanel(filenameDrugs, logger);
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				System.exit(1);
+				abort();
 			}
 		}
 
@@ -408,7 +408,7 @@ public class Drabme implements Runnable {
 				outputs = new ModelOutputs(filenameModelOutputs, logger);
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				System.exit(1);
+				abort();
 			}
 		}
 
@@ -435,7 +435,7 @@ public class Drabme implements Runnable {
 				config = new Config(filenameConfig, logger);
 			} catch (IOException e1) {
 				e1.printStackTrace();
-				System.exit(1);
+				abort();
 			}
 		}
 
@@ -452,7 +452,7 @@ public class Drabme implements Runnable {
 
 		if(files == null || files.length == 0) {
 			logger.error("No models are in the model directory. Drabme analysis stops.");
-			System.exit(1);
+			abort();
 		}
 		else {
 			for (File file : files) {
@@ -469,7 +469,7 @@ public class Drabme implements Runnable {
 			logger = new Logger(filenameOutput, directory, 3, true);
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.exit(1);
+			abort();
 		}
 
 		logger.writeFirstLoggingMessage(appName, version);

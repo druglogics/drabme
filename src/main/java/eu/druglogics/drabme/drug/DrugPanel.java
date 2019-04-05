@@ -159,7 +159,7 @@ public class DrugPanel {
 					combination[j] = getDrug(drugname);
 				} else {
 					logger.error("Combination refers to drug not in drugpanel: " + drugname);
-					System.exit(1);
+					abort();
 				}
 			}
 			perturbations.add(combination);
@@ -206,7 +206,7 @@ public class DrugPanel {
 						logger.error("The drug combination: " + PerturbationPanel.getCombinationName(combination)
 									+ " does not have the subset: " + PerturbationPanel.getCombinationName(subset)
 									+ " defined in the perturbations file");
-						System.exit(1);
+						abort();
 					}
 				}
 			}
