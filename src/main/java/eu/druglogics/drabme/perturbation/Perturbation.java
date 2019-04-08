@@ -142,7 +142,6 @@ public class Perturbation {
 	 * @param integers
 	 * @return
 	 */
-	@SuppressWarnings("unused")
 	private int[] convertIntegers(ArrayList<Integer> integers) {
 		int[] result = new int[integers.size()];
 		Iterator<Integer> iterator = integers.iterator();
