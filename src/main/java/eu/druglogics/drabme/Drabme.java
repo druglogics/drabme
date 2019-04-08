@@ -6,7 +6,7 @@ import eu.druglogics.drabme.drug.DrugResponseAnalyzer;
 import eu.druglogics.drabme.perturbation.ModelPredictions;
 import eu.druglogics.drabme.perturbation.Perturbation;
 import eu.druglogics.drabme.perturbation.PerturbationPanel;
-import eu.druglogics.gitsbe.input.Config;
+import eu.druglogics.drabme.input.Config;
 import eu.druglogics.gitsbe.util.Logger;
 import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.util.Timer;
