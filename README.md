@@ -57,3 +57,5 @@ mvn compile -P runExampleAGS
 example above. The output directory with all the generated result files when 
 running the `drabme.Launcher` will be in the same directory where the 
 configuration file is.
+- Running the `drabme.Launcher` with no parameters generates a usage/options 
+message.
