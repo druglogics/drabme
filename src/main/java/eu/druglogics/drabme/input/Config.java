@@ -4,10 +4,9 @@ import eu.druglogics.gitsbe.util.Logger;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static eu.druglogics.gitsbe.util.Util.*;
 
@@ -16,7 +15,7 @@ public class Config extends ConfigParametersDrabme {
     private static Config config = null;
 
     private Logger logger;
-    private HashMap<String, String> parameterMap;
+    private LinkedHashMap<String, String> parameterMap;
 
     private Config(String filename, Logger logger) throws IOException {
         this.logger = logger;
@@ -93,7 +92,7 @@ public class Config extends ConfigParametersDrabme {
 
         ArrayList<String> lines = new ArrayList<>();
 
-        for (HashMap.Entry<String, String> entry : parameterMap.entrySet()) {
+        for (Map.Entry<String, String> entry : parameterMap.entrySet()) {
             lines.add(entry.getKey() + ": " + entry.getValue());
         }
 
