@@ -12,12 +12,30 @@ import java.util.LinkedHashMap;
 import static eu.druglogics.gitsbe.util.Util.*;
 
 public class Config extends ConfigParametersDrabme {
+
+    private static Config config = null;
+
     private Logger logger;
     private HashMap<String, String> parameterMap;
 
-    public Config(String filename, Logger logger) throws IOException {
+    private Config(String filename, Logger logger) throws IOException {
         this.logger = logger;
         loadConfigFile(filename);
+    }
+
+    public static Config getInstance() {
+        // To ensure only one instance is created
+        if (config == null) {
+            throw new AssertionError("You have to call init first");
+        }
+        return config;
+    }
+
+    public synchronized static void init(String filename, Logger logger) throws IOException {
+        if (config != null) {
+            throw new AssertionError("You already initialized me");
+        }
+        config = new Config(filename, logger);
     }
 
     private void loadConfigFile(String filename) throws IOException {

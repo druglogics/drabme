@@ -84,7 +84,7 @@ public class Drabme implements Runnable {
 		Timer timer = new Timer();
 
 		// Load config file
-		Config config = loadConfigFile();
+		loadConfigFile();
 
 		// Load boolean models
 		ArrayList<BooleanModel> booleanModels = new ArrayList<>();
@@ -94,14 +94,13 @@ public class Drabme implements Runnable {
 		DrugPanel drugPanel = loadDrugPanel(booleanModels);
 
 		// Load perturbation panel
-		PerturbationPanel perturbationPanel =
-				loadPerturbationPanel(drugPanel, config);
+		PerturbationPanel perturbationPanel = loadPerturbationPanel(drugPanel);
 
 		// Load output weights
 		ModelOutputs outputs = loadModelOutputs(booleanModels);
 
 		createTmpDirectory();
-		activateFileDeleter(config);
+		activateFileDeleter();
 
 		// Run simulations and compute Statistics
 		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(
@@ -212,9 +211,9 @@ public class Drabme implements Runnable {
 		return drugCombinationsList;
 	}
 
-	private void activateFileDeleter(Config config) {
+	private void activateFileDeleter() {
 		FileDeleter fileDeleter = new FileDeleter(directoryTmp);
-		if (config.deleteTmpDir()) {
+		if (Config.getInstance().deleteTmpDir()) {
 			fileDeleter.activate();
 		}
 	}
@@ -352,13 +351,13 @@ public class Drabme implements Runnable {
 		}
 	}
 
-	private PerturbationPanel loadPerturbationPanel(DrugPanel drugPanel, Config config) {
+	private PerturbationPanel loadPerturbationPanel(DrugPanel drugPanel) {
 		logger.outputHeader(2, "Defining perturbations");
 
 		Drug[][] drugPerturbations = null;
 
 		if (filenamePerturbations == null) {
-			drugPerturbations = drugPanel.getCombinations(config.getCombinationSize());
+			drugPerturbations = drugPanel.getCombinations(Config.getInstance().getCombinationSize());
 		} else {
 			try {
 				drugPerturbations = drugPanel.loadCombinationsFromFile(filenamePerturbations);
@@ -429,10 +428,9 @@ public class Drabme implements Runnable {
 		return outputs;
 	}
 
-	private Config loadConfigFile() {
-		Config config = null;
+	private void loadConfigFile() {
 		try {
-			config = new Config(filenameConfig, logger);
+			Config.init(filenameConfig, logger);
 		} catch (IOException e) {
 			e.printStackTrace();
 			File file = new File(directoryOutput);
@@ -441,19 +439,17 @@ public class Drabme implements Runnable {
 					"file, generating template file: " + filenameConfig);
 			try {
 				Config.writeConfigFileTemplate(filenameConfig);
-				config = new Config(filenameConfig, logger);
+				Config.init(filenameConfig, logger);
 			} catch (IOException e1) {
 				e1.printStackTrace();
 				abort();
 			}
 		}
 
-		int verbosity = config.getVerbosity();
-		// Now that we got the verbosity from the config, we can re-set it in the logger
-		logger.setVerbosity(verbosity);
+		// Now that we have the verbosity from the config, we can re-set it in the logger
+		logger.setVerbosity(Config.getInstance().getVerbosity());
 		logger.outputHeader(1, "Config options");
-		logger.outputLines(1, config.getConfig());
-		return config;
+		logger.outputLines(1, Config.getInstance().getConfig());
 	}
 
 	private void loadBooleanModels(String directory, ArrayList<BooleanModel> booleanModels) {
