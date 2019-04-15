@@ -433,17 +433,7 @@ public class Drabme implements Runnable {
 			Config.init(filenameConfig, logger);
 		} catch (IOException e) {
 			e.printStackTrace();
-			File file = new File(directoryOutput);
-			filenameConfig = file.getParent() + "/" + "config.tab";
-			logger.outputStringMessage(1, "Cannot find config " +
-					"file, generating template file: " + filenameConfig);
-			try {
-				Config.writeConfigFileTemplate(filenameConfig);
-				Config.init(filenameConfig, logger);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				abort();
-			}
+			abort();
 		}
 
 		// Now that we have the verbosity from the config, we can re-set it in the logger
