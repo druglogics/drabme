@@ -465,8 +465,9 @@ public class Drabme implements Runnable {
 		}
 		else {
 			for (File file : files) {
-				if (file.getAbsolutePath().toLowerCase().contains("gitsbe")) {
-					booleanModels.add(new BooleanModel(file.getPath(), logger));
+				String filename = file.getAbsolutePath();
+				if (filename.toLowerCase().contains("gitsbe")) {
+					booleanModels.add(new BooleanModel(filename, logger));
 				}
 			}
 		}

@@ -32,7 +32,7 @@ class CommandLineArgsTest {
         assertThrows(ParameterException.class, () -> {
             CommandLineArgs args = new CommandLineArgs();
             JCommander.newBuilder().addObject(args).build().parse("");
-        },"");
+        });
     }
 
     @Test
@@ -41,7 +41,7 @@ class CommandLineArgsTest {
             CommandLineArgs args = new CommandLineArgs();
             String[] argv = {"-p", "project", "-c", "config"};
             JCommander.newBuilder().addObject(args).build().parse(argv);
-        },"");
+        });
     }
 
 }
