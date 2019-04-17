@@ -2,6 +2,7 @@ package eu.druglogics.drabme.perturbation;
 
 import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
+import eu.druglogics.drabme.input.Config;
 import eu.druglogics.gitsbe.util.Logger;
 import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.model.BooleanModel;
@@ -64,7 +65,7 @@ public class ResponseModel {
 			Perturbation perturbation = perturbationModel.getPerturbation();
 
 			// Calculate stable state(s), then determine global output
-			perturbationModel.calculateStableStatesVC(directoryTmp);
+			perturbationModel.calculateStableStatesVC(directoryTmp, Config.getInstance().getAttractorTool());
 			perturbationModel.calculateGlobalOutput();
 
 			// Store response for perturbation set

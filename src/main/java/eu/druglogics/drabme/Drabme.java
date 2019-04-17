@@ -21,7 +21,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
 
-/* Drabme - Drug Response Analysis of Boolean Models from Evolution
+/**
+ *  Drabme - Drug Response Analysis of Boolean Models from Evolution
  * 
  * Copyright Asmund Flobak 2014-2015-2016-2017
  * 
@@ -431,7 +432,7 @@ public class Drabme implements Runnable {
 	private void loadConfigFile() {
 		try {
 			Config.init(filenameConfig, logger);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			abort();
 		}
