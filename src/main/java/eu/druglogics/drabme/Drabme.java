@@ -3,23 +3,23 @@ package eu.druglogics.drabme;
 import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
 import eu.druglogics.drabme.drug.DrugResponseAnalyzer;
+import eu.druglogics.drabme.input.Config;
 import eu.druglogics.drabme.perturbation.ModelPredictions;
 import eu.druglogics.drabme.perturbation.Perturbation;
 import eu.druglogics.drabme.perturbation.PerturbationPanel;
-import eu.druglogics.drabme.input.Config;
-import eu.druglogics.gitsbe.util.Logger;
 import eu.druglogics.gitsbe.input.ModelOutputs;
-import eu.druglogics.gitsbe.util.Timer;
 import eu.druglogics.gitsbe.model.BooleanModel;
 import eu.druglogics.gitsbe.util.FileDeleter;
-
-import static eu.druglogics.gitsbe.util.Util.*;
-import static eu.druglogics.gitsbe.util.FileDeleter.*;
+import eu.druglogics.gitsbe.util.Logger;
+import eu.druglogics.gitsbe.util.Timer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
+
+import static eu.druglogics.gitsbe.util.FileDeleter.cleanDirectory;
+import static eu.druglogics.gitsbe.util.Util.*;
 
 /**
  *  Drabme - Drug Response Analysis of Boolean Models from Evolution

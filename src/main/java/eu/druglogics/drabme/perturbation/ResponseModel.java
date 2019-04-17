@@ -3,13 +3,14 @@ package eu.druglogics.drabme.perturbation;
 import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
 import eu.druglogics.drabme.input.Config;
-import eu.druglogics.gitsbe.util.Logger;
 import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.model.BooleanModel;
+import eu.druglogics.gitsbe.util.Logger;
 
-import static java.lang.Math.*;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import static java.lang.Math.min;
 
 /**
  * Each ResponseModel is based on a single BooleanModel instance, and splits the

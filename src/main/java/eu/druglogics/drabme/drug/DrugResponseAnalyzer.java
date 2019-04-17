@@ -4,9 +4,9 @@ import eu.druglogics.drabme.Drabme;
 import eu.druglogics.drabme.perturbation.ModelPredictions;
 import eu.druglogics.drabme.perturbation.PerturbationPanel;
 import eu.druglogics.drabme.perturbation.ResponseModel;
-import eu.druglogics.gitsbe.util.Logger;
 import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.model.BooleanModel;
+import eu.druglogics.gitsbe.util.Logger;
 
 import java.io.File;
 import java.io.IOException;

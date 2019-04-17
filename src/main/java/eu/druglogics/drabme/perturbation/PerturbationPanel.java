@@ -4,8 +4,10 @@ import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
 import eu.druglogics.gitsbe.util.Logger;
 
-import static java.lang.Math.*;
 import java.util.ArrayList;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class PerturbationPanel {
 
