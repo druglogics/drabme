@@ -232,7 +232,7 @@ public class Drabme implements Runnable {
 		String mergedLogFilename =
 				new File(logDirectory, appName + "_simulations.log").getAbsolutePath();
 		try {
-			mergeFiles(dra.simulationFileList, mergedLogFilename);
+			mergeFiles(dra.simulationFileList, mergedLogFilename, true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
