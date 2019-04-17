@@ -1,6 +1,7 @@
 package eu.druglogics.drabme.drug;
 
 import eu.druglogics.drabme.Drabme;
+import eu.druglogics.drabme.input.Config;
 import eu.druglogics.drabme.perturbation.ModelPredictions;
 import eu.druglogics.drabme.perturbation.PerturbationPanel;
 import eu.druglogics.drabme.perturbation.ResponseModel;
@@ -37,13 +38,28 @@ public class DrugResponseAnalyzer {
 	}
 
 	public void analyze() {
-		IntStream.range(0, booleanModels.size()).parallel().forEach(modelIndex -> {
-			try {
-				runSimulation(modelIndex);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
+		if (Config.getInstance().useParallelSimulations()) {
+			// Run simulations in parallel
+			setNumberOfAllowedParallelSimulations();
+			IntStream.range(0, booleanModels.size()).parallel()
+				.forEach(modelIndex -> {
+					try {
+						runSimulation(modelIndex);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+		} else {
+			// Run simulations in serial
+			IntStream.range(0, booleanModels.size())
+				.forEach(modelIndex -> {
+					try {
+						runSimulation(modelIndex);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				});
+		}
 	}
 
 	private void runSimulation(int modelIndex) throws IOException {
@@ -53,18 +69,18 @@ public class DrugResponseAnalyzer {
 		addFileToSimulationFileList(new File(logDirectory, filenameOutput).getAbsolutePath());
 
 		// create new logger for each (parallel) simulation
-		Logger simulation_logger = new Logger(filenameOutput, logDirectory, logger.getVerbosity(), true);
-		simulation_logger.outputHeader(2, "Adding model " + modelName);
+		Logger simulationLogger = new Logger(filenameOutput, logDirectory, logger.getVerbosity(), true);
+		simulationLogger.outputHeader(2, "Adding model " + modelName);
 
 		ResponseModel responseModel =
 				new ResponseModel(booleanModels.get(modelIndex), modelOutputs,
-						          perturbationPanel, simulation_logger);
+						          perturbationPanel, simulationLogger);
 		responseModel.initializeResponseModel();
 		responseModel.simulateResponses(directoryTmp);
 
 		addModelPredictionsToList(responseModel.getModelPredictions());
 
-		simulation_logger.finish();
+		simulationLogger.finish();
 	}
 
 	public void computeStatistics() {
@@ -80,5 +96,13 @@ public class DrugResponseAnalyzer {
 	
 	synchronized private void addModelPredictionsToList(ModelPredictions modelPredictions) {
 		modelPredictionsList.add(modelPredictions);
+	}
+
+	private void setNumberOfAllowedParallelSimulations() {
+		int parallelSimulationsNumber = Config.getInstance().parallelSimulationsNumber();
+		System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism",
+				Integer.toString(parallelSimulationsNumber - 1));
+		logger.outputStringMessage(1, "\nSetting number of parallel simulations to: "
+				+ parallelSimulationsNumber);
 	}
 }
