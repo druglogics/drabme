@@ -10,7 +10,7 @@ ensembles.
 - A model outputs file (nodes with weights that affect the calculation of the 
 model simulation output)
 - A configuration file
-- A `models/` directory with `.gitsbe` files
+- A **models** directory with `.gitsbe` files
 
 ## Output
 
@@ -26,7 +26,7 @@ model simulation output)
     synergy score number indicating how much synergistic that combination was - 
     a more negative number means more synergistic)
 - A **model predictions** file (for every model and drug combination tested,
- a value: 0 = no synergy predicted, 1 = synergy predicted, NA = couldnâ€™t find 
+ a value: 0 = no synergy predicted, 1 = synergy predicted, NA = couldn’t find 
  attractors in either the drug combination inhibited model or in any of the 
  two single-drug inhibited models)
 
