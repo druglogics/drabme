@@ -50,7 +50,7 @@ public class DrugResponseAnalyzer {
 					}
 				});
 		} else {
-			// Run simulations in serial
+			logger.outputStringMessage(1, "\nRunning simulations serially");
 			IntStream.range(0, booleanModels.size())
 				.forEach(modelIndex -> {
 					try {

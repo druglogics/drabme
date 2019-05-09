@@ -62,7 +62,7 @@ public class PerturbationModel extends BooleanModel {
 
 			for (String stableState : stableStates) {
 				for (int j = 0; j < modelOutputs.size(); j++) {
-					int indexStableState = this.getIndexOfEquation(modelOutputs.get(j).getName());
+					int indexStableState = this.getIndexOfEquation(modelOutputs.get(j).getNodeName());
 					if (indexStableState >= 0) {
 						int temp = Character.getNumericValue(stableState.charAt(indexStableState));
 						temp *= modelOutputs.get(j).getWeight();

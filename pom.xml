@@ -5,12 +5,12 @@
     <groupId>eu.druglogics</groupId>
     <artifactId>drabme</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <name>Drabme: Drug Response Analysis to Boolean Model Ensembles</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gitsbe.version>1.0.5</gitsbe.version>
+        <gitsbe.version>1.0.7</gitsbe.version>
     </properties>
 
     <build>
@@ -73,11 +73,14 @@
                             <execution>
                                 <phase>compile</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>eu.druglogics.drabme.Launcher</mainClass>
+                                    <executable>java</executable>
                                     <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>target/drabme-${project.version}-jar-with-dependencies.jar</argument>
+                                        <argument>eu.druglogics.drabme.Launcher</argument>
                                         <argument>--project</argument>
                                         <argument>example_run_ags</argument>
                                         <argument>--modelsDir</argument>
@@ -94,10 +97,6 @@
                                 </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <mainClass>com.test.Startup</mainClass>
-                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>

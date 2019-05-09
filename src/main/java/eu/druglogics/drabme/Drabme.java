@@ -407,18 +407,7 @@ public class Drabme implements Runnable {
 			outputs = new ModelOutputs(filenameModelOutputs, logger);
 		} catch (IOException e) {
 			e.printStackTrace();
-			File file = new File(directoryOutput);
-			filenameModelOutputs = file.getParent() + "/" + "modeloutputs.tab";
-			logger.outputStringMessage(1,
-					"Couldn't load model outputs file, generating template file: "
-							+ filenameModelOutputs);
-			try {
-				ModelOutputs.saveModelOutputsFileTemplate(filenameModelOutputs);
-				outputs = new ModelOutputs(filenameModelOutputs, logger);
-			} catch (IOException e1) {
-				e1.printStackTrace();
-				abort();
-			}
+			abort();
 		}
 
 		logger.outputHeader(1, "Model Outputs");
