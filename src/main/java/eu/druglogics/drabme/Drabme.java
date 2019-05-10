@@ -75,11 +75,11 @@ public class Drabme implements Runnable {
 
 		createOutputDirectory();
 
-		String logDirectory = new File(directoryOutput, "log").getAbsolutePath();
-		createLogDirectory(logDirectory);
+		String directoryLog = new File(directoryOutput, "log").getAbsolutePath();
+		createLogDirectory(directoryLog);
 
 		// Initialize logger
-		initializeDrabmeLogger(logDirectory);
+		initializeDrabmeLogger(directoryLog);
 
 		// Start timer
 		Timer timer = new Timer();
@@ -105,9 +105,9 @@ public class Drabme implements Runnable {
 
 		// Run simulations and compute Statistics
 		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(
-				perturbationPanel, booleanModels, outputs, directoryTmp, logger, logDirectory
+				perturbationPanel, booleanModels, outputs, directoryTmp, logger, directoryLog
 		);
-		runDrugResponseAnalyzer(dra, logDirectory);
+		runDrugResponseAnalyzer(dra, directoryLog);
 
 		// Generate Summary Reports for Drabme
 		generateModelWiseResponses(perturbationPanel);
@@ -118,6 +118,11 @@ public class Drabme implements Runnable {
 
 		// Clean tmp directory
 		cleanDirectory(logger);
+
+		// Compress log and tmp dirs to preserve storage space
+		if (Config.getInstance().compressLogAndTmpFiles()) {
+			archive(directoryLog, directoryTmp);
+		}
 
 		// Stop timer
 		timer.stopTimer();
