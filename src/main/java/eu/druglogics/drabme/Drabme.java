@@ -260,7 +260,7 @@ public class Drabme implements Runnable {
 	 * @param perturbationPanel
 	 */
 	private void generateEnsembleWiseSynergies(PerturbationPanel perturbationPanel) {
-		// File to store excess effects over agerage responses in
+		// File to store excess effects over average responses in
 		String filename = new File(directoryOutput, projectName + "_ensemblewise_synergies.tab")
 				.getAbsolutePath();
 
