@@ -5,12 +5,12 @@
     <groupId>eu.druglogics</groupId>
     <artifactId>drabme</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.6</version>
+    <version>1.1.0</version>
     <name>Drabme: Drug Response Analysis to Boolean Model Ensembles</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gitsbe.version>1.0.9</gitsbe.version>
+        <gitsbe.version>1.2.1</gitsbe.version>
     </properties>
 
     <build>
@@ -102,6 +102,16 @@
             </build>
         </profile>
     </profiles>
+
+    <repositories>
+    <repository>
+        <id>ginsim_snapshot</id>
+        <name>GINsim snapshot repository</name>
+        <snapshots><enabled>true</enabled></snapshots>
+        <releases><enabled>false</enabled></releases>
+        <url>http://ginsim.org/maven/snapshot</url>
+    </repository>
+    </repositories>
 
     <dependencies>
         <!-- Gitsbe -->
