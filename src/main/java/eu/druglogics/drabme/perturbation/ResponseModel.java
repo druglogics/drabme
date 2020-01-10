@@ -25,17 +25,14 @@ import static java.lang.Math.min;
 public class ResponseModel {
 
 	private BooleanModel originalModel; // The original (unperturbed) model
-	private ModelOutputs modelOutputs;
 	private PerturbationPanel perturbationPanel;
 	private Logger logger;
 	private String modelName;
 	private ArrayList<PerturbationModel> perturbationModels; // Set of boolean models extended with perturbations
 	private ModelPredictions modelPredictions;
 
-	public ResponseModel(BooleanModel booleanModel, ModelOutputs modelOutputs,
-						 PerturbationPanel perturbationPanel, Logger logger) {
+	public ResponseModel(BooleanModel booleanModel, PerturbationPanel perturbationPanel, Logger logger) {
 		this.originalModel = booleanModel;
-		this.modelOutputs = modelOutputs;
 		this.perturbationPanel = perturbationPanel;
 		this.logger = logger;
 		this.modelName = booleanModel.getModelName() + "_responsemodel";
@@ -52,21 +49,20 @@ public class ResponseModel {
 
 		// Define model for each perturbation set
 		for (int index = 0; index < perturbationPanel.getNumberOfPerturbations(); index++) {
-			perturbationModels.add(new PerturbationModel(
-					originalModel, perturbationPanel.getPerturbations()[index], modelOutputs, logger
-			));
+			perturbationModels.add(new PerturbationModel(originalModel,
+				perturbationPanel.getPerturbations()[index], logger));
 		}
 	}
 
-	public void simulateResponses(String directoryTmp) throws IOException {
+	public void simulateResponses(String directoryTmp) throws Exception {
 
 		for (PerturbationModel perturbationModel : perturbationModels) {
 			logger.outputStringMessage(2, ""); // Add blank line for better visualization of results
 
 			Perturbation perturbation = perturbationModel.getPerturbation();
 
-			// Calculate stable state(s), then determine global output
-			perturbationModel.calculateStableStatesVC(directoryTmp, Config.getInstance().getAttractorTool());
+			// Calculate attractors, then determine global output
+			perturbationModel.calculateAttractors(directoryTmp);
 			perturbationModel.calculateGlobalOutput();
 
 			// Store response for perturbation set
@@ -135,7 +131,7 @@ public class ResponseModel {
 		} else {
 			modelPredictions.addNAPrediction(drugCombination);
 			logger.outputStringMessage(2,
-					drugCombination + " cannot be evaluated for synergy (lacking stable state(s))");
+					drugCombination + " cannot be evaluated for synergy (lacking attractors)");
 		}
 	}
 

@@ -1,6 +1,6 @@
 package eu.druglogics.drabme.perturbation;
 
-import eu.druglogics.gitsbe.input.ModelOutputs;
+import eu.druglogics.drabme.input.Config;
 import eu.druglogics.gitsbe.model.BooleanEquation;
 import eu.druglogics.gitsbe.model.BooleanModel;
 import eu.druglogics.gitsbe.util.Logger;
@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 /**
- * Similar to the BooleanModel in Gitsbe, but adds output weights, and drugs
+ * Similar to the BooleanModel in Gitsbe, but adds drugs
  * with their computed effects.
  * 
  * @author asmund
@@ -18,18 +18,15 @@ import java.util.stream.IntStream;
 public class PerturbationModel extends BooleanModel {
 
 	private Perturbation perturbation;
-	private ModelOutputs modelOutputs;
-	private float globaloutput;
+	private float globalOutput;
 	private boolean hasGlobalOutput = false;
 	private Logger logger;
 
-	PerturbationModel(BooleanModel booleanModel, Perturbation perturbation, ModelOutputs modelOutputs,
-			Logger logger) {
+	PerturbationModel(BooleanModel booleanModel, Perturbation perturbation, Logger logger) {
 		// Copy constructor from parent
-		super(booleanModel, logger);
+		super(booleanModel, Config.getInstance().getAttractorTool(), logger);
 
 		this.perturbation = perturbation;
-		this.modelOutputs = modelOutputs;
 		this.logger = logger;
 
 		StringBuilder modelNameWithDrugs = new StringBuilder(modelName);
@@ -49,35 +46,30 @@ public class PerturbationModel extends BooleanModel {
 		}
 	}
 
-	void calculateGlobalOutput() {
-
-		if (stableStates.size() == 0) {
-			logger.outputStringMessage(2, "No stable states found");
+	/**
+	 * Overriden version of the {@link eu.druglogics.gitsbe.model.BooleanModel#calculateGlobalOutput}
+	 * which also stores a boolean value indicating whether the <i>globalOutput</i> was calculated
+	 * or not (in case there were no attractors found).
+	 *
+	 * @return
+	 */
+	@Override
+	public float calculateGlobalOutput() {
+		if (!hasAttractors()) {
+			logger.outputStringMessage(2, "No attractors found");
 			logger.outputStringMessage(2,
 				PerturbationPanel.getCombinationName(perturbation.getDrugs()) + "\tNA");
 			this.hasGlobalOutput = false;
 		} else {
-			globaloutput = 0;
 			this.hasGlobalOutput = true;
-
-			for (String stableState : stableStates) {
-				for (int j = 0; j < modelOutputs.size(); j++) {
-					int indexStableState = this.getIndexOfEquation(modelOutputs.get(j).getNodeName());
-					if (indexStableState >= 0) {
-						int temp = Character.getNumericValue(stableState.charAt(indexStableState));
-						temp *= modelOutputs.get(j).getWeight();
-						globaloutput += temp;
-					}
-				}
-			}
-
-			globaloutput /= stableStates.size();
+			this.globalOutput = super.calculateGlobalOutput();
 
 			logger.debug(
-				PerturbationPanel.getCombinationName(perturbation.getDrugs()) + "\t" + globaloutput
+				PerturbationPanel.getCombinationName(perturbation.getDrugs()) + "\t" + globalOutput
 			);
-
 		}
+
+		return globalOutput;
 	}
 
 	public Perturbation getPerturbation() {
@@ -89,11 +81,7 @@ public class PerturbationModel extends BooleanModel {
 	}
 
 	float getGlobalOutput() {
-		return globaloutput;
-	}
-
-	public boolean hasStableState() {
-		return (stableStates.size() > 0);
+		return globalOutput;
 	}
 
 	public void perturbNode(String nodeName, boolean perturbation) {

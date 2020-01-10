@@ -100,15 +100,14 @@ public class Drabme implements Runnable {
 		PerturbationPanel perturbationPanel = loadPerturbationPanel(drugPanel);
 
 		// Load output weights
-		ModelOutputs outputs = loadModelOutputs(booleanModels);
+		loadModelOutputs(booleanModels);
 
 		createTmpDirectory();
 		activateFileDeleter();
 
 		// Run simulations and compute Statistics
-		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(
-				perturbationPanel, booleanModels, outputs, directoryTmp, logger, directoryLog
-		);
+		DrugResponseAnalyzer dra = new DrugResponseAnalyzer(perturbationPanel, booleanModels,
+			directoryTmp, logger, directoryLog);
 		runDrugResponseAnalyzer(dra, directoryLog);
 
 		// Generate Summary Reports for Drabme
@@ -415,21 +414,18 @@ public class Drabme implements Runnable {
 		this.loadBooleanModels(directoryModels, booleanModels);
 	}
 
-	private ModelOutputs loadModelOutputs(ArrayList<BooleanModel> booleanModels) {
-		ModelOutputs outputs = null;
+	private void loadModelOutputs(ArrayList<BooleanModel> booleanModels) {
 		try {
-			outputs = new ModelOutputs(filenameModelOutputs, logger);
-		} catch (IOException e) {
+			ModelOutputs.init(filenameModelOutputs, logger);
+		} catch (Exception e) {
 			e.printStackTrace();
 			abort();
 		}
 
 		logger.outputHeader(1, "Model Outputs");
-		logger.outputLines(1, outputs.getModelOutputs());
+		logger.outputLines(1, ModelOutputs.getInstance().getModelOutputsVerbose());
 
-		outputs.checkModelOutputNodeNames(booleanModels.get(0));
-
-		return outputs;
+		ModelOutputs.getInstance().checkModelOutputNodeNames(booleanModels.get(0));
 	}
 
 	private void loadConfigFile() {
@@ -456,8 +452,9 @@ public class Drabme implements Runnable {
 		else {
 			for (File file : files) {
 				String filename = file.getAbsolutePath();
-				if (filename.toLowerCase().contains("gitsbe")) {
-					booleanModels.add(new BooleanModel(filename, logger));
+				if (filename.toLowerCase().endsWith("gitsbe")) {
+					booleanModels.add(new BooleanModel(
+						filename, Config.getInstance().getAttractorTool(), logger));
 				}
 			}
 		}
