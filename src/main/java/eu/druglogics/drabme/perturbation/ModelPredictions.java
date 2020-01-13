@@ -46,7 +46,7 @@ public class ModelPredictions {
 	}
 
 	/**
-	 * Return a tab-seperated String starting with the modelName and then the
+	 * Return a tab-seperated String starting with the <i>modelName</i> and then the
 	 * prediction value for each drug combination as in the order specified in the
 	 * DrugCombinationsList
 	 * 
@@ -64,7 +64,7 @@ public class ModelPredictions {
 		return result.toString();
 	}
 
-	private String getModelName() {
+	String getModelName() {
 		return modelName;
 	}
 
