@@ -1,6 +1,8 @@
 package eu.druglogics.drabme.perturbation;
 
 import eu.druglogics.drabme.input.Config;
+import eu.druglogics.gitsbe.input.ModelOutputs;
+import eu.druglogics.gitsbe.input.OutputWeight;
 import eu.druglogics.gitsbe.model.BooleanEquation;
 import eu.druglogics.gitsbe.model.BooleanModel;
 import eu.druglogics.gitsbe.util.Logger;
@@ -47,9 +49,11 @@ public class PerturbationModel extends BooleanModel {
 	}
 
 	/**
-	 * Overriden version of the {@link eu.druglogics.gitsbe.model.BooleanModel#calculateGlobalOutput}
-	 * which also stores a boolean value indicating whether the <i>globalOutput</i> was calculated
-	 * or not (in case there were no attractors found).
+	 * Use this function after you have calculated the {@link #calculateAttractors(String)
+	 * attractors} in order to find the <b>non-normalized</b> <i>globaloutput</i> of the
+	 * perturbed model, based on the weights of the nodes as defined in the {@link ModelOutputs}
+	 * Class. Also, a boolean value indicating whether the model has a globaloutput or
+	 * not (the latter in case no attractors were found) is stored.
 	 *
 	 * @return
 	 */
@@ -62,7 +66,26 @@ public class PerturbationModel extends BooleanModel {
 			this.hasGlobalOutput = false;
 		} else {
 			this.hasGlobalOutput = true;
-			this.globalOutput = super.calculateGlobalOutput();
+
+			ModelOutputs modelOutputs = ModelOutputs.getInstance();
+			globalOutput = 0;
+
+			for (String attractor : this.getAttractors()) {
+				for (OutputWeight outputWeight : modelOutputs.getModelOutputs()) {
+					int nodeIndexInAttractor = this.getIndexOfEquation(outputWeight.getNodeName());
+					if (nodeIndexInAttractor >= 0) {
+						// can only be '1','0' or '-'
+						char nodeState = attractor.charAt(nodeIndexInAttractor);
+						float stateValue = (nodeState == '-')
+							? (float) 0.5
+							: Character.getNumericValue(attractor.charAt(nodeIndexInAttractor));
+
+						globalOutput += stateValue * outputWeight.getWeight();
+					}
+				}
+			}
+
+			globalOutput /= getAttractors().size();
 
 			logger.debug(
 				PerturbationPanel.getCombinationName(perturbation.getDrugs()) + "\t" + globalOutput
