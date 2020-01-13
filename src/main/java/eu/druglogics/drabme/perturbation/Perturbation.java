@@ -5,7 +5,8 @@ import eu.druglogics.drabme.drug.DrugPanel;
 import eu.druglogics.gitsbe.util.Logger;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+
+import static eu.druglogics.gitsbe.util.Util.convertFloats;
 
 public class Perturbation {
 
@@ -36,7 +37,7 @@ public class Perturbation {
 		for (Drug drug : drugs) {
 			if (drug.getTargets().size() == 0) {
 				logger.outputStringMessage(2,
-						"Added drug " + drug.getName() + " which has no targets to perturbations");
+					"Added drug " + drug.getName() + " which has no targets to perturbations");
 			}
 		}
 
@@ -134,36 +135,6 @@ public class Perturbation {
 
 	int getPerturbationHash() {
 		return perturbationHash;
-	}
-
-	/**
-	 * Converts an ArrayList of Integers to an Array of int
-	 * 
-	 * @param integers
-	 * @return
-	 */
-	private int[] convertIntegers(ArrayList<Integer> integers) {
-		int[] result = new int[integers.size()];
-		Iterator<Integer> iterator = integers.iterator();
-		for (int i = 0; i < result.length; i++) {
-			result[i] = iterator.next();
-		}
-		return result;
-	}
-	
-	/**
-	 * Converts an ArrayList of Floats to an Array of float values
-	 * 
-	 * @param floats
-	 * @return
-	 */
-	private float[] convertFloats(ArrayList<Float> floats) {
-		float[] result = new float[floats.size()];
-		Iterator<Float> iterator = floats.iterator();
-		for (int i = 0; i < result.length; i++) {
-			result[i] = iterator.next();
-		}
-		return result;
 	}
 
 }
