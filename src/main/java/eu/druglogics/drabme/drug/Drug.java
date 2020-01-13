@@ -20,11 +20,12 @@ public class Drug {
 	}
 
 	/**
-	 * 
+	 * Adds effect that describes if the drug is activating or inhibiting it's
+	 * target (most drugs are inhibitors, but some can be modelled as activators,
+	 * i.e. drugs inducing DNA damage that activates TP53)
+	 *
 	 * @param effect
-	 *            to describe if drug is activating or inhibiting it's target (most
-	 *            drugs are inhibitors, but some can be modelled as activators, i.e.
-	 *            drugs inducing DNA damage that activates TP53)
+	 *
 	 */
 	void addEffect(boolean effect) {
 		String effector;

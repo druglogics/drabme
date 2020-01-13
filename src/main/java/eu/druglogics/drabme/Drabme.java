@@ -13,6 +13,7 @@ import eu.druglogics.gitsbe.util.FileDeleter;
 import eu.druglogics.gitsbe.util.Logger;
 import eu.druglogics.gitsbe.util.Timer;
 
+import javax.naming.ConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -371,12 +372,13 @@ public class Drabme implements Runnable {
 		Drug[][] drugPerturbations = null;
 
 		if (filenamePerturbations == null) {
-			drugPerturbations = drugPanel.getCombinations(Config.getInstance().getCombinationSize());
+			drugPerturbations = drugPanel.getDrugCombinations(Config.getInstance().getCombinationSize());
 		} else {
 			try {
 				drugPerturbations = drugPanel.loadCombinationsFromFile(filenamePerturbations);
 			} catch (Exception e) {
 				e.printStackTrace();
+				abort();
 			}
 		}
 
@@ -397,10 +399,12 @@ public class Drabme implements Runnable {
 			try {
 				DrugPanel.writeDrugPanelFileTemplate(filenameDrugs);
 				drugPanel = new DrugPanel(filenameDrugs, logger);
-			} catch (IOException e1) {
+			} catch (Exception e1) {
 				e1.printStackTrace();
 				abort();
 			}
+		} catch (ConfigurationException e) {
+			abort();
 		}
 
 		drugPanel.checkDrugTargets(booleanModels);

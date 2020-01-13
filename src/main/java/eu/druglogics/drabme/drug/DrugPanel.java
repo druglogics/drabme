@@ -7,13 +7,13 @@ import org.paukov.combinatorics.Factory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
+import javax.naming.ConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static eu.druglogics.gitsbe.util.Util.abort;
 import static eu.druglogics.gitsbe.util.Util.readLinesFromFile;
 
 public class DrugPanel {
@@ -22,82 +22,77 @@ public class DrugPanel {
 	protected ArrayList<Drug> drugs;
 	private Logger logger;
 
-	public DrugPanel(String filename, Logger logger) throws IOException {
+	public DrugPanel(String filename, Logger logger) throws IOException, ConfigurationException {
 		this.logger = logger;
 		this.drugs = new ArrayList<>();
-		loadDrugsFromFile(filename);
+		loadDrugPanelFile(filename);
 	}
 
 	/**
 	 * 
 	 * @param drugNames
 	 *            array of drugs to be probed
-	 * @return boolean of whether all drugs are in panel or not
+	 * @return boolean of whether <b>all</b> given drug names are
+	 * in the {@link DrugPanel} or not
 	 */
-	public boolean areDrugsInPanel(String[] drugNames) {
+	public boolean areDrugsInPanel(ArrayList<String> drugNames) {
+		ArrayList<String> drugsNamesInPanel = getDrugNames();
 		for (String drugName : drugNames) {
-			if (!isDrugInPanel(drugName))
+			if (!drugsNamesInPanel.contains(drugName))
 				return false;
 		}
 		return true;
 	}
 
 	/**
-	 * 
-	 * @param name
-	 *            of drug probed
+	 * @param name of drug probed
 	 * @return boolean of whether drug is in panel or not
+	 *
 	 */
-	private boolean isDrugInPanel(String name) {
-		return (getIndexOfDrug(name) >= 0);
+	boolean isDrugInPanel(String name) {
+		return(getDrugNames().contains(name));
 	}
 
 	/**
+	 * Returns Drug based on given name
 	 * 
-	 * @param drugName
-	 * @return index of drug in ArrayList<Drug> drugs
-	 */
-	private int getIndexOfDrug(String drugName) {
-		int index = -1;
-
-		for (int i = 0; i < drugs.size(); i++) {
-			if (drugs.get(i).getName().equals(drugName)) {
-				index = i;
-			}
-		}
-
-		return index;
-	}
-
-	/**
-	 * Returns Drug based on name
-	 * 
-	 * @param name
-	 *            of drug
+	 * @param name of drug
 	 * @return Drug
-	 * @throws Exception
-	 *             if drug is not in panel
+	 * @throws Exception if drug is not in panel
 	 */
-	private Drug getDrug(String name) throws Exception {
-		int index = getIndexOfDrug(name);
-
-		if (index >= 0) {
-			return drugs.get(index);
+	Drug getDrug(String name) throws Exception {
+		if (!isDrugInPanel(name))
+			throw new Exception("Drug `" + name + "` was not found in drug panel");
+		else {
+			return drugs.get(getDrugNames().indexOf(name));
 		}
-		throw new Exception("Exception: Drug not found in drug panel. "
-				+ "Use function isDrugInPanel (String name)");
+	}
+
+	public ArrayList<Drug> getDrugs() {
+		return drugs;
+	}
+
+	public ArrayList<String> getDrugNames() {
+		ArrayList<String> drugNameList = new ArrayList<>();
+		for (Drug drug : this.drugs) {
+			drugNameList.add(drug.getName());
+		}
+
+		return drugNameList;
+	}
+
+	int getDrugPanelSize() {
+		return getDrugs().size();
 	}
 
 	/**
-	 * 
-	 * @param filename
-	 *            storing drugs to be loaded
-	 * @throws IOException
+	 * Use this function to load an appropriately formatted drugPanel file
+	 *
+	 * @param filename storing drugs to be loaded (with their targets and respective effect)
 	 */
-	private void loadDrugsFromFile(String filename) throws IOException {
+	private void loadDrugPanelFile(String filename) throws IOException, ConfigurationException {
+		logger.outputStringMessage(3, "Reading drugpanel file: " + new File(filename).getAbsolutePath());
 
-		logger.outputStringMessage(3, "Reading drugpanel file: "
-				+ new File(filename).getAbsolutePath());
 		ArrayList<String> lines = readLinesFromFile(filename, true);
 
 		for (int i = 0; i < lines.size(); i++) {
@@ -112,8 +107,7 @@ public class DrugPanel {
 			} else if (effect.equals("activates")) {
 				drugs.get(i).addEffect(true);
 			} else {
-				logger.outputStringMessage(1,
-						"Drug effect not annotated as either \"activates\" or \"inhibits\" " + (effect));
+				throw new ConfigurationException("Drug effect: `" + effect + "` is neither `activates` or `inhibits`");
 			}
 
 			// Add drug targets
@@ -124,11 +118,10 @@ public class DrugPanel {
 	}
 
 	/**
-	 * Adds warnings to the log if there are drug targets not defined in the
-	 * model/network topology
+	 * Adds warnings to the log if there are drug targets not defined
+	 * in the first boolean model of the given Arraylist of models.
 	 *
 	 * @param booleanModels
-	 * @throws Exception
 	 */
 	public void checkDrugTargets(ArrayList<BooleanModel> booleanModels) {
 		logger.outputHeader(3, "Checking drug targets");
@@ -139,13 +132,20 @@ public class DrugPanel {
 		for (Drug drug : this.drugs) {
 			for (String target : drug.getTargets()) {
 				if (!nodes.contains(target)) {
-					logger.outputStringMessage(3, "Warning: Target " + target
-							+ " not in network file.");
+					logger.outputStringMessage(3, "Warning: Target `" + target + "` of Drug `"
+						+ drug.getName() + "` is not in the network file/model");
 				}
 			}
 		}
 	}
 
+	/**
+	 * Loads the drug combinations from a <i>perturbations</i> file.
+	 *
+	 * @param filename
+	 * @return
+	 * @throws Exception
+	 */
 	public Drug[][] loadCombinationsFromFile(String filename) throws Exception {
 
 		ArrayList<String> lines = readLinesFromFile(filename, true);
@@ -156,14 +156,9 @@ public class DrugPanel {
 			int combosize = line.split("\t").length;
 			Drug[] combination = new Drug[combosize];
 
-			for (int j = 0; j < combosize; j++) {
-				String drugName = line.split("\t")[j];
-				if (isDrugInPanel(drugName)) {
-					combination[j] = getDrug(drugName);
-				} else {
-					logger.error("Combination refers to drug not in drugpanel: " + drugName);
-					abort();
-				}
+			for (int i = 0; i < combosize; i++) {
+				String drugName = line.split("\t")[i];
+				combination[i] = getDrug(drugName);
 			}
 			perturbations.add(combination);
 		}
@@ -175,13 +170,13 @@ public class DrugPanel {
 
 	/**
 	 * Checks if the drug combinations from the perturbations file are consistent:
-	 * If I have drugs AK and PI as perturbations and not PD, I can have AK-PI
-	 * combination, but not AK-PD for example. This means that for every combination
-	 * (no matter the size) I should have its subsets in the perturbations
+	 * If drugs `AK` and `PI` are defined as perturbations but not `PD`, I can have `AK-PI`
+	 * combination, but not `AK-PD` for example. This means that for every combination
+	 * (no matter the size) I should have its subsets in the perturbations.
 	 * 
 	 * @param perturbations
 	 */
-	private void checkDrugCombinationConsistency(ArrayList<Drug[]> perturbations) {
+	private void checkDrugCombinationConsistency(ArrayList<Drug[]> perturbations) throws ConfigurationException {
 		boolean foundSubset;
 
 		for (int index = 0; index < perturbations.size(); index++) {
@@ -204,10 +199,10 @@ public class DrugPanel {
 						}
 					}
 					if (!foundSubset) {
-						logger.error("The drug combination: " + PerturbationPanel.getCombinationName(combination)
-									+ " does not have the subset: " + PerturbationPanel.getCombinationName(subset)
-									+ " defined in the perturbations file");
-						abort();
+						throw new ConfigurationException("The drug combination `"
+							+ PerturbationPanel.getCombinationName(combination)
+							+ "` does not have the subset `" + PerturbationPanel.getCombinationName(subset)
+							+ "` defined in the perturbations file");
 					}
 				}
 			}
@@ -230,7 +225,13 @@ public class DrugPanel {
 		writer.close();
 	}
 
-	public Drug[][] getCombinations(int size) {
+	/**
+	 * Get all Drug combinations up to the given size (>= 0)
+	 *
+	 * @param size
+	 * @return
+	 */
+	public Drug[][] getDrugCombinations(int size) {
 		int lowerLimit = 0;
 		return getCombinations(lowerLimit, size);
 	}
@@ -281,7 +282,9 @@ public class DrugPanel {
 	}
 
 	/**
-	 * 
+	 * Get all the drug combinations subsets that are one less size than the given one.
+	 * Only applies to sets equal or larger than 2 drug sets
+	 *
 	 * @param combination
 	 *            of size k that will be split to subsets of size k-1
 	 * @return
