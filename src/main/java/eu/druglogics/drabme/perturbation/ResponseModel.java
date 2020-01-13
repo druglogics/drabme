@@ -2,21 +2,18 @@ package eu.druglogics.drabme.perturbation;
 
 import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
-import eu.druglogics.drabme.input.Config;
-import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.model.BooleanModel;
 import eu.druglogics.gitsbe.util.Logger;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import static java.lang.Math.min;
 
 /**
- * Each ResponseModel is based on a single BooleanModel instance, and splits the
- * original model to a collection of PerturbationModel, where each
- * PerturbationModel is the specific instance of models with perturbations
- * specified in the PerturbationPanel instance
+ * Each {@link ResponseModel} is based on a single {@link BooleanModel} instance
+ * and splits the original model to a collection of {@link PerturbationModel}s,
+ * where each {@link PerturbationModel} is related to a specific
+ * {@link Perturbation} as specified in the {@link PerturbationPanel} Class.
  * 
  * @author asmund
  *
@@ -72,23 +69,31 @@ public class ResponseModel {
 				perturbation.addPrediction(perturbationModel.getGlobalOutput());
 			}
 
-			// Check for synergies among drugs in combination (more than two drugs)
+			// Check if perturbation models with 2 or more drugs are synergistic
 			if (perturbation.getDrugs().length >= 2) {
-				checkCombinationSynergy(perturbation.getDrugs());
+				checkCombinationModelForSynergy(perturbation.getDrugs());
 			}
 		}
 	}
 
-	private void checkCombinationSynergy(Drug[] combination) {
-
+	/**
+	 * Checks if the {@link PerturbationModel} related to the given drug
+	 * <code>combination</code> (must be 2 or more drugs!) is synergistic or not, by
+	 * comparing the globaloutput of that perturbed model with the minimum
+	 * globaloutput of the models perturbed with each of the drug combination's
+	 * subsets (HSA rule).
+	 *
+	 * @param combination
+	 */
+	private void checkCombinationModelForSynergy(Drug[] combination) {
 		if (combination.length == 2)
 			logger.debug("Combination: " + combination[0].getName() + " " + combination[1].getName());
 
 		int drugHash = DrugPanel.getDrugSetHash(combination);
 		logger.debug("DrugHash:" + drugHash);
 
-		PerturbationModel combinationResponse = perturbationModels.get(getIndexOfPerturbationModel(combination));
-		Perturbation perturbation = combinationResponse.getPerturbation();
+		PerturbationModel drugCombPerturbationModel = perturbationModels.get(getIndexOfPerturbationModel(combination));
+		Perturbation perturbation = drugCombPerturbationModel.getPerturbation();
 
 		Drug[][] subsets = DrugPanel.getCombinationSubsets(combination);
 		String drugCombination = PerturbationPanel.getCombinationName(combination);
@@ -99,8 +104,8 @@ public class ResponseModel {
 
 		boolean computable = true;
 
-		// Check if model for combination and all subsets have stable state(s)
-		if (!combinationResponse.hasGlobalOutput())
+		// Check if model for combination and all subsets have attractor(s)
+		if (!drugCombPerturbationModel.hasGlobalOutput())
 			computable = false;
 
 		for (Drug[] subset : subsets) {
@@ -110,16 +115,16 @@ public class ResponseModel {
 
 		if (computable) {
 			float minimumGlobalOutput =
-					perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
+				perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
 
 			// find the subset with the minimum global output
 			for (Drug[] subset : subsets) {
 				int index = getIndexOfPerturbationModel(subset);
 				minimumGlobalOutput =
-						min(minimumGlobalOutput, perturbationModels.get(index).getGlobalOutput());
+					min(minimumGlobalOutput, perturbationModels.get(index).getGlobalOutput());
 			}
 
-			if (combinationResponse.getGlobalOutput() < minimumGlobalOutput) {
+			if (drugCombPerturbationModel.getGlobalOutput() < minimumGlobalOutput) {
 				perturbation.addSynergyPrediction();
 				modelPredictions.addSynergyPrediction(drugCombination);
 				logger.outputStringMessage(2, drugCombination + " is synergistic");
@@ -130,8 +135,8 @@ public class ResponseModel {
 			}
 		} else {
 			modelPredictions.addNAPrediction(drugCombination);
-			logger.outputStringMessage(2,
-					drugCombination + " cannot be evaluated for synergy (lacking attractors)");
+			logger.outputStringMessage(2, drugCombination
+				+ " cannot be evaluated for synergy (lacking attractors)");
 		}
 	}
 
