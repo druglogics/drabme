@@ -37,7 +37,7 @@ public class Perturbation {
 		for (Drug drug : drugs) {
 			if (drug.getTargets().size() == 0) {
 				logger.outputStringMessage(2,
-					"Added drug " + drug.getName() + " which has no targets to perturbations");
+					"Added drug `" + drug.getName() + "` which has no targets to perturbations");
 			}
 		}
 
@@ -68,6 +68,14 @@ public class Perturbation {
 		return convertFloats(predictedResponses);
 	}
 
+	/**
+	 * Use this function to calculate the <i>mean</i> and <i>standard deviation</i>
+	 * of the predicted response values that have been registered for a
+	 * {@link Perturbation} instance, through the {@link #addPrediction(float)}
+	 * function. Only then the {@link #getAveragePredictedResponse()} and
+	 * {@link #getStandardDeviationPredictedResponse()} functions can be used.
+	 *
+	 */
 	public void calculateStatistics() {
 		float responseSum = 0;
 		int numPredictions = predictedResponses.size();
@@ -126,7 +134,7 @@ public class Perturbation {
 			result.append(str);
 		}
 
-		return result.toString();
+		return result.toString().trim();
 	}
 
 	public String getName() {
