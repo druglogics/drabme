@@ -27,7 +27,7 @@ public class Drug {
 	 * @param effect
 	 *
 	 */
-	void addEffect(boolean effect) {
+	public void addEffect(boolean effect) {
 		String effector;
 		if (effect)
 			effector = "activator";
@@ -43,7 +43,7 @@ public class Drug {
 		return effect;
 	}
 
-	void addTargets(String[] targets) {
+	public void addTargets(String[] targets) {
 		for (String target: targets) {
 			addTarget(target);
 		}
@@ -55,7 +55,7 @@ public class Drug {
 		targets.add(target);
 	}
 
-	void removeTarget(String target) {
+	public void removeTarget(String target) {
 		logger.outputStringMessage(2, "Removed target " + target + " from drug " + name);
 
 		targets.remove(target);
