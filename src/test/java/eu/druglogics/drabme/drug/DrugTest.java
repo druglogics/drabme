@@ -40,7 +40,7 @@ class DrugTest {
 
     @Test
     void test_add_non_empty_targets() {
-        String [] testTargets = {"MAP2K1", "MAP2K2"};
+        String[] testTargets = {"MAP2K1", "MAP2K2"};
         testDrug.addTargets(testTargets);
 
         ArrayList<String> targets = testDrug.getTargets();
