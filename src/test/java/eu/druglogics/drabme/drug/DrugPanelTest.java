@@ -339,8 +339,18 @@ class DrugPanelTest {
 		// SET: {A,B}
 		Drug[] doubleDrugSet = new Drug[2];
 		doubleDrugSet[0] = new Drug("A", mockLogger);
+		doubleDrugSet[0].addTargets(new String[]{"AA1","AA2"});
 		doubleDrugSet[1] = new Drug("B", mockLogger);
-		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet), 131);
+		doubleDrugSet[1].addTargets(new String[]{"BB1","BB2"});
+		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet), 260233);
+
+		// SET: {B,A} (order does not matter for the hash!)
+		Drug[] doubleDrugSet2 = new Drug[2];
+		doubleDrugSet2[0] = new Drug("B", mockLogger);
+		doubleDrugSet2[0].addTargets(new String[]{"BB1","BB2"});
+		doubleDrugSet2[1] = new Drug("A", mockLogger);
+		doubleDrugSet2[1].addTargets(new String[]{"AA1","AA2"});
+		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet), 260233);
 
 		// SET: {A,B,C,D}
 		Drug[] fourDrugSet = new Drug[4];
