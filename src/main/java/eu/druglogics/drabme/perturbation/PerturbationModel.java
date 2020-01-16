@@ -1,6 +1,5 @@
 package eu.druglogics.drabme.perturbation;
 
-import eu.druglogics.drabme.input.Config;
 import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.input.OutputWeight;
 import eu.druglogics.gitsbe.model.BooleanEquation;
@@ -8,7 +7,6 @@ import eu.druglogics.gitsbe.model.BooleanModel;
 import eu.druglogics.gitsbe.util.Logger;
 
 import java.util.ArrayList;
-import java.util.stream.IntStream;
 
 /**
  * Similar to the BooleanModel in Gitsbe, but adds drugs
@@ -24,9 +22,17 @@ public class PerturbationModel extends BooleanModel {
 	private boolean hasGlobalOutput = false;
 	private Logger logger;
 
+	/**
+	 * Constructor for building a {@link PerturbationModel} out of a
+	 * given {@link BooleanModel} and {@link Perturbation}.
+	 *
+	 * @param booleanModel
+	 * @param perturbation
+	 * @param logger
+	 */
 	PerturbationModel(BooleanModel booleanModel, Perturbation perturbation, Logger logger) {
 		// Copy constructor from parent
-		super(booleanModel, Config.getInstance().getAttractorTool(), logger);
+		super(booleanModel, logger);
 
 		this.perturbation = perturbation;
 		this.logger = logger;
@@ -107,10 +113,6 @@ public class PerturbationModel extends BooleanModel {
 		return globalOutput;
 	}
 
-	public void perturbNode(String nodeName, boolean perturbation) {
-		this.fixNode(nodeName, perturbation);
-	}
-
 	private void perturbNodes(ArrayList<String> nodeNames, boolean perturbation) {
 		for (String nodeName : nodeNames) {
 			this.fixNode(nodeName, perturbation);
@@ -125,10 +127,5 @@ public class PerturbationModel extends BooleanModel {
 					+ " (equation index: " + index + ")");
 			booleanEquations.set(index, new BooleanEquation("  " + nodeName + " *= " + value + " "));
 		}
-	}
-
-	public void fixNodes(String[] nodeNames, boolean[] values) {
-		IntStream.range(0, nodeNames.length)
-				.forEach(i -> this.fixNode(nodeNames[i], values[i]));
 	}
 }
