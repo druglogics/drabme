@@ -272,7 +272,7 @@ public class Drabme implements Runnable {
 
 			if (perturbation.getDrugs().length >= 2) {
 				logger.outputStringMessageToFile(filename, perturbation.getName() + "\t"
-						+ perturbationPanel.getPredictedAverageCombinationResponse(perturbation));
+					+ perturbationPanel.getAverageResponseExcessOverSubsets(perturbation));
 			}
 		}
 	}
@@ -294,7 +294,7 @@ public class Drabme implements Runnable {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
 			logger.outputStringMessageToFile(filename,
-					perturbation.getName() + "\t" + perturbation.getAveragePredictedResponse());
+				perturbation.getName() + "\t" + perturbation.getAveragePredictedResponse());
 		}
 	}
 
@@ -308,19 +308,18 @@ public class Drabme implements Runnable {
 			ArrayList<BooleanModel> booleanModels) {
 		// File to store drug synergies in
 		String filename = new File(directoryOutput, projectName + "_modelwise_synergies.tab")
-				.getAbsolutePath();
+			.getAbsolutePath();
 
 		logger.outputHeader(1, "Synergies vs Non-synergies per perturbation");
-		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Synergies"
-																	   + "\t" + "Non-synergies");
+		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Synergies" + "\t" + "Non-synergies");
 
 		for (int i = 0; i < perturbationPanel.getNumberOfPerturbations(); i++) {
 			Perturbation perturbation = perturbationPanel.getPerturbations()[i];
 
 			if (perturbation.getDrugs().length >= 2) {
 				logger.outputStringMessageToFile(filename, perturbation.getName() + "\t"
-						+ perturbation.getSynergyPredictions() + "\t"
-						+ perturbation.getNonSynergyPredictions());
+					+ perturbation.getSynergyPredictions() + "\t"
+					+ perturbation.getNonSynergyPredictions());
 			}
 
 			// if synergies + non-synergies for one combination exceeds the number of models
@@ -343,7 +342,7 @@ public class Drabme implements Runnable {
 	private void generateModelWiseResponses(PerturbationPanel perturbationPanel) {
 		// File to store perturbation responses
 		String filename = new File(directoryOutput, projectName + "_modelwise_responses.tab")
-				.getAbsolutePath();
+			.getAbsolutePath();
 
 		logger.outputHeader(1, "Drug perturbation responses");
 		logger.outputStringMessageToFile(filename, "Perturbation" + "\t" + "Average"
@@ -360,9 +359,9 @@ public class Drabme implements Runnable {
 			}
 
 			logger.outputStringMessageToFile(filename,perturbation.getName() + "\t"
-					+ perturbation.getAveragePredictedResponse() + "\t"
-					+ perturbation.getStandardDeviationPredictedResponse()
-					+ individualResponses);
+				+ perturbation.getAveragePredictedResponse() + "\t"
+				+ perturbation.getStandardDeviationPredictedResponse()
+				+ individualResponses);
 		}
 	}
 

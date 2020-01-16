@@ -31,7 +31,7 @@ public class PerturbationPanel {
 	 * @param drugs
 	 * @return
 	 */
-	private int getIndexOfPerturbation(Drug[] drugs) {
+	int getIndexOfPerturbation(Drug[] drugs) {
 		int index = -1;
 
 		int hashA, hashB;
@@ -50,7 +50,7 @@ public class PerturbationPanel {
 	}
 
 	/**
-	 * @return the perturbations
+	 * @return the {@link #perturbations}
 	 */
 	public Perturbation[] getPerturbations() {
 		return perturbations;
@@ -58,16 +58,16 @@ public class PerturbationPanel {
 
 	/**
 	 * Returns an array of perturbations that have specific number of drugs
-	 * (combinationSize)
+	 * (<i>size</i>)
 	 * 
-	 * @param combinationSize
+	 * @param size
 	 * @return
 	 */
-	private Perturbation[] getPerturbations(int combinationSize) {
+	public Perturbation[] getPerturbations(int size) {
 		ArrayList<Perturbation> result = new ArrayList<>();
 
 		for (Perturbation perturbation : perturbations) {
-			if (perturbation.getDrugs().length == combinationSize) {
+			if (perturbation.getDrugs().length == size) {
 				result.add(perturbation);
 			}
 		}
@@ -86,7 +86,7 @@ public class PerturbationPanel {
 	 * @param size
 	 * @return
 	 */
-	private int getNumberOfPerturbations(int size) {
+	public int getNumberOfPerturbations(int size) {
 		int result = 0;
 
 		for (Perturbation perturbation : perturbations) {
@@ -98,7 +98,22 @@ public class PerturbationPanel {
 		return result;
 	}
 
-	public double getPredictedAverageCombinationResponse(Perturbation perturbation) {
+	/**
+	 * This function returns the average excess response over all the
+	 * perturbation subsets of the given one, using a simple <b>HSA (Highest
+	 * Simple Agent)</b> rule. <br/><br/>
+	 * For example, for a given double perturbation <i>{A,B}</i>
+	 * and its respective perturbation subsets {A} and {B} (A and B are drugs), we get
+	 * the 3 average predicted responses using the {@link Perturbation#getAveragePredictedResponse()}.
+	 * Then, if <code>avgPredRes(A+B) < min(avgPredRes(A),avgPredRes(B))</code> we return the
+	 * average negative excess (<b>synergy score</b>), if <code>avgPredRes(A+B)</code> is between the
+	 * value of the subsets we return <i>0</i> (<b>non-interaction score</b>), and if larger than all,
+	 * we return the average positive excess (<b>antagonistic score</b>).
+	 *
+	 * @param perturbation
+	 * @return
+	 */
+	public double getAverageResponseExcessOverSubsets(Perturbation perturbation) {
 		double response = perturbation.getAveragePredictedResponse();
 
 		Drug[][] subsets = DrugPanel.getCombinationSubsets(perturbation.getDrugs());
@@ -128,18 +143,6 @@ public class PerturbationPanel {
 			return 0.0;
 	}
 
-	public double[] getPredictedAverageCombinationResponses(int combinationSize) {
-		double[] responses = new double[getNumberOfPerturbations(combinationSize)];
-
-		Perturbation[] subset = this.getPerturbations(combinationSize);
-
-		for (int i = 0; i < responses.length; i++) {
-			responses[i] = getPredictedAverageCombinationResponse(subset[i]);
-		}
-
-		return responses;
-	}
-
 	/**
 	 * Creates an array of names from an array of drug combinations by calling
 	 * getCombinationName for each subarray
@@ -159,9 +162,9 @@ public class PerturbationPanel {
 
 	/**
 	 * Creates name for drug combination by iterating drug names and adding them to
-	 * String, separating drug names by hyphens (-)
+	 * the returned string, separating drug names by hyphens (-)
 	 * 
-	 * @param combination
+	 * @param combination an array of drugs (don't have to be part of the {@link PerturbationPanel})
 	 * @return name of drug combination
 	 */
 	public static String getCombinationName(Drug[] combination) {
