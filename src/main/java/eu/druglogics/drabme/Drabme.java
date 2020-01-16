@@ -419,6 +419,7 @@ public class Drabme implements Runnable {
 
 	private void loadModelOutputs(ArrayList<BooleanModel> booleanModels) {
 		try {
+			ModelOutputs.reset(); // in case Gitsbe is executed before Drabme, Singleton needs to be reset
 			ModelOutputs.init(filenameModelOutputs, logger);
 		} catch (Exception e) {
 			e.printStackTrace();
