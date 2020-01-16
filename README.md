@@ -64,7 +64,7 @@ In model simulations, the null reference drug combination response is defined as
 the minimum value of the two single perturbations with respect to global output 
 growth (similar to the **highest single agent** model for in vitro studies). 
 The global output values mentioned are the average values for all models that 
-had stable states for the specified perturbations. So, an **ensemble-wise 
+had attractors for the specified perturbations. So, an **ensemble-wise 
 synergy** is called when the average global output value for a combination is 
 less than the minimum of the two average values of the single perturbations.
 
