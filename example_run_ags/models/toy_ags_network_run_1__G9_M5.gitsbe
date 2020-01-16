@@ -1,7 +1,7 @@
 #Boolean model file in gitsbe format
 modelname: toy_ags_network_run_1__G9_M5
-fitness: 0.8101854
-stablestate: 00011110111100001100101000000101101011111101000000110010000101011000111010111
+fitness: 0.81790143
+stablestate: 00011110111100001100101001010101111011111101000000110010000101011000111010111
 equation:  Antisurvival *=  (  (  CASP3 )  or FOXO3 ) 
 equation:  CASP3 *=  (  (  CASP8 )  or CASP9 ) 
 equation:  FOXO3 *=  not  (  ( AKT1 )  or NLK ) 
@@ -29,13 +29,13 @@ equation:  RTPK *=  (  (  MMP7 )  or RTPKgene ) and not  (  ( MAPK14 )  or MAP2K
 equation:  RTPKgene *=  (  FOXO3 ) 
 equation:  MAP2K1 *=  (  (  ARAF )  or MAP3K8 ) and not  ( MAPK1 ) 
 equation:  SHC1 *=  (  RTPK ) and not  ( PTEN ) 
-equation:  PTEN *=  (  PTENgene ) and not  ( GSK3B ) 
+equation:  PTEN *=  (  PTENgene ) or not  ( GSK3B ) 
 equation:  GRB2 *=  (  SHC1 ) 
 equation:  SOS1 *=  (  GRB2 ) or not  ( MAPK1 ) 
 equation:  MAPK1 *=  (  MAP2K1 ) and not  ( DUSP6 ) 
 equation:  KRAS *=  (  (  SOS1 )  or PTPN11 ) 
 equation:  PTPN11 *=  (  GAB1 ) 
-equation:  ARAF *=  (  KRAS ) and not  (  (  ( AKT1 )  or MAPK1 )  or RHEB ) 
+equation:  ARAF *=  (  KRAS ) or not  (  (  ( AKT1 )  or MAPK1 )  or RHEB ) 
 equation:  RHEB *=  not  ( TSC1 ) 
 equation:  MAP3K8 *=  (  IKBKB ) 
 equation:  DUSP6 *=  (  (  MAPK1 )  or mTORC1 ) 
