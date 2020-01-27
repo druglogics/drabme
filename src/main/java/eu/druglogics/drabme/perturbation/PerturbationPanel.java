@@ -61,7 +61,6 @@ public class PerturbationPanel {
 	 * (<i>size</i>)
 	 * 
 	 * @param size
-	 * @return
 	 */
 	public Perturbation[] getPerturbations(int size) {
 		ArrayList<Perturbation> result = new ArrayList<>();
@@ -84,7 +83,6 @@ public class PerturbationPanel {
 	 * (size)
 	 * 
 	 * @param size
-	 * @return
 	 */
 	public int getNumberOfPerturbations(int size) {
 		int result = 0;
@@ -111,7 +109,6 @@ public class PerturbationPanel {
 	 * we return the average positive excess (<b>antagonistic score</b>).
 	 *
 	 * @param perturbation
-	 * @return
 	 */
 	public double getAverageResponseExcessOverSubsets(Perturbation perturbation) {
 		double response = perturbation.getAveragePredictedResponse();

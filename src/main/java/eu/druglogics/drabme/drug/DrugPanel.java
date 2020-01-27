@@ -143,7 +143,6 @@ public class DrugPanel {
 	 * Loads the drug combinations from a <i>perturbations</i> file.
 	 *
 	 * @param filename
-	 * @return
 	 * @throws Exception
 	 */
 	public Drug[][] loadCombinationsFromFile(String filename) throws Exception {
@@ -229,7 +228,6 @@ public class DrugPanel {
 	 * Get all Drug combinations up to the given size (>= 0)
 	 *
 	 * @param size
-	 * @return
 	 */
 	public Drug[][] getDrugCombinations(int size) {
 		int lowerLimit = 0;
@@ -285,9 +283,8 @@ public class DrugPanel {
 	 * Get all the drug combinations subsets that are one less size than the given one.
 	 * Only applies to sets equal or larger than 2 drug sets
 	 *
-	 * @param combination
-	 *            of size k that will be split to subsets of size k-1
-	 * @return
+	 * @param combination of size k that will be split to subsets of size k-1
+	 *
 	 */
 	public static Drug[][] getCombinationSubsets(Drug[] combination) {
 		ArrayList<Drug[]> subsets = new ArrayList<>();

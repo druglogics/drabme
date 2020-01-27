@@ -51,7 +51,6 @@ public class ModelPredictions {
 	 * DrugCombinationsList
 	 * 
 	 * @param drugCombinationsList
-	 * @return
 	 */
 	public String getModelPredictionsVerbose(ArrayList<String> drugCombinationsList) {
 		StringBuilder result = new StringBuilder(getModelName());

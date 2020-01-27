@@ -61,7 +61,6 @@ public class PerturbationModel extends BooleanModel {
 	 * Class. Also, a boolean value indicating whether the model has a globaloutput or
 	 * not (the latter in case no attractors were found) is stored.
 	 *
-	 * @return
 	 */
 	@Override
 	public float calculateGlobalOutput() {
