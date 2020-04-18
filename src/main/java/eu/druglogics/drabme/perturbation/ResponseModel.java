@@ -2,6 +2,7 @@ package eu.druglogics.drabme.perturbation;
 
 import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
+import eu.druglogics.drabme.input.Config;
 import eu.druglogics.gitsbe.model.BooleanModel;
 import eu.druglogics.gitsbe.util.Logger;
 
@@ -81,7 +82,8 @@ public class ResponseModel {
 	 * <code>combination</code> (must be 2 or more drugs!) is synergistic or not, by
 	 * comparing the globaloutput of that perturbed model with the minimum
 	 * globaloutput of the models perturbed with each of the drug combination's
-	 * subsets (HSA rule).
+	 * subsets (HSA rule) or with the product of the normalized globaloutput
+	 * values of these models (Bliss rule).
 	 *
 	 * @param combination
 	 */
@@ -92,6 +94,7 @@ public class ResponseModel {
 		int drugHash = DrugPanel.getDrugSetHash(combination);
 		logger.debug("DrugHash:" + drugHash);
 
+		// get the combined perturbation's drug subsets
 		PerturbationModel drugCombPerturbationModel = perturbationModels.get(getIndexOfPerturbationModel(combination));
 		Perturbation perturbation = drugCombPerturbationModel.getPerturbation();
 
@@ -114,24 +117,43 @@ public class ResponseModel {
 		}
 
 		if (computable) {
-			float minimumGlobalOutput =
-				perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
+			if (Config.getInstance().getSynergyMethod().equals("hsa")) {
+				float minimumGlobalOutput =
+					perturbationModels.get(getIndexOfPerturbationModel(subsets[0])).getGlobalOutput();
 
-			// find the subset with the minimum global output
-			for (Drug[] subset : subsets) {
-				int index = getIndexOfPerturbationModel(subset);
-				minimumGlobalOutput =
-					min(minimumGlobalOutput, perturbationModels.get(index).getGlobalOutput());
-			}
+				// find the subset with the minimum global output
+				for (Drug[] subset : subsets) {
+					int index = getIndexOfPerturbationModel(subset);
+					minimumGlobalOutput =
+						min(minimumGlobalOutput, perturbationModels.get(index).getGlobalOutput());
+				}
 
-			if (drugCombPerturbationModel.getGlobalOutput() < minimumGlobalOutput) {
-				perturbation.addSynergyPrediction();
-				modelPredictions.addSynergyPrediction(drugCombination);
-				logger.outputStringMessage(2, drugCombination + " is synergistic");
-			} else {
-				perturbation.addNonSynergyPrediction();
-				modelPredictions.addNonSynergyPrediction(drugCombination);
-				logger.outputStringMessage(2, drugCombination + " is NOT synergistic");
+				if (drugCombPerturbationModel.getGlobalOutput() < minimumGlobalOutput) {
+					perturbation.addSynergyPrediction();
+					modelPredictions.addSynergyPrediction(drugCombination);
+					logger.outputStringMessage(2, drugCombination + " is synergistic (HSA)");
+				} else {
+					perturbation.addNonSynergyPrediction();
+					modelPredictions.addNonSynergyPrediction(drugCombination);
+					logger.outputStringMessage(2, drugCombination + " is NOT synergistic (HSA)");
+				}
+			} else { // bliss
+				// calculate expected bliss normalized global output from the subsets
+				float expectedBlissGlobalOutput = 1;
+				for (Drug[] subset : subsets) {
+					int index = getIndexOfPerturbationModel(subset);
+					expectedBlissGlobalOutput *= perturbationModels.get(index).getNormalizedGlobalOutput();
+				}
+
+				if (drugCombPerturbationModel.getNormalizedGlobalOutput() < expectedBlissGlobalOutput) {
+					perturbation.addSynergyPrediction();
+					modelPredictions.addSynergyPrediction(drugCombination);
+					logger.outputStringMessage(2, drugCombination + " is synergistic (Bliss)");
+				} else {
+					perturbation.addNonSynergyPrediction();
+					modelPredictions.addNonSynergyPrediction(drugCombination);
+					logger.outputStringMessage(2, drugCombination + " is NOT synergistic (Bliss)");
+				}
 			}
 		} else {
 			modelPredictions.addNAPrediction(drugCombination);
