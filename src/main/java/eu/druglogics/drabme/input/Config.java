@@ -89,6 +89,8 @@ public class Config extends ConfigParametersDrabme {
 
                 case "synergy_method":
                     synergy_method = value;
+                    checkSynergyMethod();
+                    break;
             }
         }
     }

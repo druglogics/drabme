@@ -24,6 +24,8 @@ class ConfigParametersDrabmeTest {
     void test_synergy_method() {
         ConfigParametersDrabme parameters = new ConfigParametersDrabme();
 
+        assertEquals("hsa", parameters.synergy_method);
+
         parameters.synergy_method = "something";
         assertThrows(ConfigurationException.class, parameters::checkSynergyMethod);
 

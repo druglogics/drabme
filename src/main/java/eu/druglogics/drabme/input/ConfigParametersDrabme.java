@@ -9,7 +9,7 @@ import java.util.Arrays;
 public class ConfigParametersDrabme extends ConfigParametersGlobal {
 
     public int max_drug_comb_size;
-    public String synergy_method;
+    public String synergy_method = "hsa";
 
     public int getCombinationSize() {
         return max_drug_comb_size;
