@@ -2,6 +2,7 @@ package eu.druglogics.drabme.perturbation;
 
 import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
+import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.util.Logger;
 
 import java.util.ArrayList;
@@ -111,6 +112,19 @@ public class Perturbation {
 		if (!isStatisticsCalculated)
 			calculateStatistics();
 		return mean;
+	}
+
+	/**
+	 * Use this function in order to get the <b>normalized</b> average <i>globaloutput</i>
+	 * of the perturbation.
+	 *
+	 * @return the mean response value in the [0,1] range
+	 */
+	public double getNormalizedAveragePredictedResponse() {
+		if (!isStatisticsCalculated)
+			calculateStatistics();
+		ModelOutputs modelOutputs = ModelOutputs.getInstance();
+		return ((mean - modelOutputs.getMinOutput()) / (modelOutputs.getMaxOutput() - modelOutputs.getMinOutput()));
 	}
 
 	public double getStandardDeviationPredictedResponse() {

@@ -1,9 +1,15 @@
 package eu.druglogics.drabme.perturbation;
 
 import eu.druglogics.drabme.drug.Drug;
+import eu.druglogics.gitsbe.input.ModelOutputs;
 import eu.druglogics.gitsbe.util.Logger;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.platform.commons.util.ClassLoaderUtils;
 
+import java.io.File;
+import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -13,6 +19,21 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 class PerturbationTest {
+
+	@BeforeAll
+	static void init_model_outputs() throws Exception {
+		Logger mockLogger = mock(Logger.class);
+		ClassLoader classLoader = ClassLoaderUtils.getDefaultClassLoader();
+		String filename = new File(classLoader.getResource("test_modeloutputs_2").getFile()).getPath();
+		ModelOutputs.init(filename, mockLogger);
+	}
+
+	@AfterAll
+	static void reset_model_outputs() throws IllegalAccessException, NoSuchFieldException {
+		Field instance = ModelOutputs.class.getDeclaredField("modeloutputs");
+		instance.setAccessible(true);
+		instance.set(null, null);
+	}
 
 	@Test
 	void test_double_perturbation() {
@@ -77,5 +98,8 @@ class PerturbationTest {
 		DecimalFormat df = new DecimalFormat("#.00000");
 		assertEquals(Double.valueOf(df.format(perturbation.getAveragePredictedResponse())), 0.12);
 		assertEquals(Double.valueOf(df.format(perturbation.getStandardDeviationPredictedResponse())), 0.93381);
+
+		// test_modeloutputs_2: minGl: -2, maxGL: 2
+		assertEquals(Double.valueOf(df.format(perturbation.getNormalizedAveragePredictedResponse())), 0.53);
 	}
 }
