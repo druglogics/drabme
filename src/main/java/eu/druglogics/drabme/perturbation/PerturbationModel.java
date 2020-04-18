@@ -112,6 +112,17 @@ public class PerturbationModel extends BooleanModel {
 		return globalOutput;
 	}
 
+	/**
+	 * Use this function after {@link #calculateGlobalOutput()} in order to get the
+	 * <b>normalized</b> <i>globaloutput</i> of the perturbed model.
+	 *
+	 * @return the {@link #globalOutput} value in the [0,1] range
+	 */
+	float getNormalizedGlobalOutput() {
+		ModelOutputs modelOutputs = ModelOutputs.getInstance();
+		return ((globalOutput - modelOutputs.getMinOutput()) / (modelOutputs.getMaxOutput() - modelOutputs.getMinOutput()));
+	}
+
 	private void perturbNodes(ArrayList<String> nodeNames, boolean perturbation) {
 		for (String nodeName : nodeNames) {
 			this.fixNode(nodeName, perturbation);
