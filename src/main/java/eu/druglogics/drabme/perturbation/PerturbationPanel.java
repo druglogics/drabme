@@ -2,6 +2,7 @@ package eu.druglogics.drabme.perturbation;
 
 import eu.druglogics.drabme.drug.Drug;
 import eu.druglogics.drabme.drug.DrugPanel;
+import eu.druglogics.drabme.input.Config;
 import eu.druglogics.gitsbe.util.Logger;
 
 import java.util.ArrayList;
@@ -98,20 +99,30 @@ public class PerturbationPanel {
 
 	/**
 	 * This function returns the average excess response over all the
-	 * perturbation subsets of the given one, using a simple <b>HSA (Highest
-	 * Simple Agent)</b> rule. <br/><br/>
-	 * For example, for a given double perturbation <i>{A,B}</i>
+	 * perturbation subsets of the given one, using either the <b>HSA (Highest
+	 * Simple Agent)</b> or the <b>Bliss</b> method (which is used is based on
+	 * the {@link eu.druglogics.drabme.input.ConfigParametersDrabme#synergy_method} value).
+	 *
+	 * <br/><br/>
+	 * For example, using the HSA method for a given double perturbation <i>{A,B}</i>
 	 * and its respective perturbation subsets {A} and {B} (A and B are drugs), we get
 	 * the 3 average predicted responses using the {@link Perturbation#getAveragePredictedResponse()}.
 	 * Then, if <code>avgPredRes(A+B) < min(avgPredRes(A),avgPredRes(B))</code> we return the
 	 * average negative excess (<b>synergy score</b>), if <code>avgPredRes(A+B)</code> is between the
-	 * value of the subsets we return <i>0</i> (<b>non-interaction score</b>), and if larger than all,
+	 * value of the subsets we return <i>0</i> (<b>non-interaction score</b>), and if larger than both,
 	 * we return the average positive excess (<b>antagonistic score</b>).
+	 * <br/><br/>
+	 *
+	 * Same logic applies to the Bliss method, with the only difference that we use the
+	 * {@link Perturbation#getNormalizedAveragePredictedResponse()} to get the normalized
+	 * average responses, compute their product (<code>normAvgPredRes(A) *
+	 * normAvgPredRes(B)</code>) and compare it with the normalized average combination response
+	 * <code>normAvgPredRes(A+B)</code>.
 	 *
 	 * @param perturbation
 	 */
 	public double getAverageResponseExcessOverSubsets(Perturbation perturbation) {
-		double response = perturbation.getAveragePredictedResponse();
+		double excess;
 
 		Drug[][] subsets = DrugPanel.getCombinationSubsets(perturbation.getDrugs());
 		int[] indexSubset = new int[subsets.length];
@@ -120,24 +131,37 @@ public class PerturbationPanel {
 			indexSubset[i] = getIndexOfPerturbation(subsets[i]);
 		}
 
-		double minimumResponseSubset = perturbations[indexSubset[0]].getAveragePredictedResponse();
-		double maximumResponseSubset = perturbations[indexSubset[0]].getAveragePredictedResponse();
+		if (Config.getInstance().getSynergyMethod().equals("hsa")) {
+			double minimumResponseSubset = perturbations[indexSubset[0]].getAveragePredictedResponse();
+			double maximumResponseSubset = perturbations[indexSubset[0]].getAveragePredictedResponse();
 
-		for (int i = 1; i < indexSubset.length; i++) {
-			minimumResponseSubset = min(minimumResponseSubset,
+			for (int i = 1; i < indexSubset.length; i++) {
+				minimumResponseSubset = min(minimumResponseSubset,
 					perturbations[indexSubset[i]].getAveragePredictedResponse());
-			maximumResponseSubset = max(maximumResponseSubset,
+				maximumResponseSubset = max(maximumResponseSubset,
 					perturbations[indexSubset[i]].getAveragePredictedResponse());
+			}
+
+			logger.debug("min: " + minimumResponseSubset + " max: " + maximumResponseSubset);
+
+			double response = perturbation.getAveragePredictedResponse();
+			if (response < minimumResponseSubset)
+				excess = response - minimumResponseSubset;
+			else if (response > maximumResponseSubset)
+				excess = response - maximumResponseSubset;
+			else
+				excess = 0.0;
+		} else { // bliss
+			double expectedBlissCombinationResponse = 1;
+			for (int index : indexSubset) {
+				expectedBlissCombinationResponse *= perturbations[index].getNormalizedAveragePredictedResponse();
+			}
+
+			double response = perturbation.getNormalizedAveragePredictedResponse();
+			excess = response - expectedBlissCombinationResponse;
 		}
 
-		logger.debug("min: " + minimumResponseSubset + " max: " + maximumResponseSubset);
-
-		if (response < minimumResponseSubset)
-			return response - minimumResponseSubset;
-		else if (response > maximumResponseSubset)
-			return response - maximumResponseSubset;
-		else
-			return 0.0;
+		return excess;
 	}
 
 	/**
