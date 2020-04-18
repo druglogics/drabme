@@ -83,7 +83,8 @@ public class ResponseModel {
 	 * comparing the globaloutput of that perturbed model with the minimum
 	 * globaloutput of the models perturbed with each of the drug combination's
 	 * subsets (HSA rule) or with the product of the normalized globaloutput
-	 * values of these models (Bliss rule).
+	 * values of these models (Bliss rule). Which method will be used is based on
+	 * the {@link eu.druglogics.drabme.input.ConfigParametersDrabme#synergy_method} value.
 	 *
 	 * @param combination
 	 */
