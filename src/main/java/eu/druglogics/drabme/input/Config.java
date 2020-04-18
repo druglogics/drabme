@@ -86,6 +86,9 @@ public class Config extends ConfigParametersDrabme {
                 case "max_drug_comb_size":
                     max_drug_comb_size = Integer.parseInt(value);
                     break;
+
+                case "synergy_method":
+                    synergy_method = value;
             }
         }
     }

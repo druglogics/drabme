@@ -36,6 +36,7 @@ class ConfigTest {
         assertEquals(3, Config.getInstance().getVerbosity());
         assertTrue(Config.getInstance().useParallelSimulations());
         assertEquals(4, Config.getInstance().getCombinationSize());
+        assertEquals("bliss", Config.getInstance().getSynergyMethod());
     }
 
     @Test
