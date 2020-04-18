@@ -17,14 +17,14 @@ mvn clean install
 
 The recommended way to run Drabme is to use it’s `Launcher`. 
 From the root directory of the repo run: (remember to change the `{version}` to the 
-appropriate one, e.g. `1.0.5`):
+appropriate one, e.g. `1.2.0`):
 
 ```
 cd example_run_ags
 java -cp ../target/drabme-{version}-jar-with-dependencies.jar eu.druglogics.drabme.Launcher --project=test --modelsDir=models --drugs=toy_ags_drugpanel.tab --perturbations=toy_ags_perturbations.tab --config=toy_ags_config.tab --modeloutputs=toy_ags_modeloutputs.tab
 ```
 
-or run the mvn profile from the drabme root directory:
+or run the mvn profile directly:
 ```
 mvn compile -P runExampleAGS
 ```
