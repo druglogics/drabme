@@ -51,7 +51,9 @@ public class DrugResponseAnalyzer {
 	private void runSimulation(int modelIndex) {
 		try {
 			String modelName = booleanModels.get(modelIndex).getModelName();
-			String filenameOutput = Drabme.appName + modelName.substring(modelName.lastIndexOf("_run_")) + ".txt";
+			String filenameOutput = (modelName.contains("_run_"))
+				? Drabme.appName + modelName.substring(modelName.lastIndexOf("_run_")) + ".txt"
+				: Drabme.appName + modelName + ".txt";
 
 			addFileToSimulationFileList(new File(logDirectory, filenameOutput).getAbsolutePath());
 
