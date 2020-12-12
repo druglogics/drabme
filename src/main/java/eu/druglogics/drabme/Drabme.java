@@ -370,7 +370,7 @@ public class Drabme implements Runnable {
 
 		Drug[][] drugPerturbations = null;
 
-		if (filenamePerturbations == null) {
+		if (filenamePerturbations == null || filenamePerturbations.trim().isEmpty()) {
 			drugPerturbations = drugPanel.getDrugCombinations(Config.getInstance().getCombinationSize());
 		} else {
 			try {
