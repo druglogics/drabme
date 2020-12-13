@@ -381,7 +381,16 @@ public class Drabme implements Runnable {
 			}
 		}
 
-		return new PerturbationPanel(drugPerturbations, logger);
+		PerturbationPanel perturbationPanel = null;
+
+		try {
+			perturbationPanel = new PerturbationPanel(drugPerturbations, logger);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			abort();
+		}
+
+		return perturbationPanel;
 	}
 
 	private DrugPanel loadDrugPanel(ArrayList<BooleanModel> booleanModels) {

@@ -325,16 +325,16 @@ public class DrugPanel {
 	 * @return hash
 	 */
 	public static int getDrugSetHash(Drug[] drugs) {
-		int hash = 0;
+		StringBuilder drugStr = new StringBuilder();
 
 		for (Drug drug : drugs) {
-			hash += drug.getName().hashCode();
+			drugStr.append(drug.getName());
 
 			for (int j = 0; j < drug.getTargets().size(); j++) {
-				hash += drug.getTargets().get(j).hashCode();
+				drugStr.append(drug.getTargets().get(j));
 			}
 		}
 
-		return hash;
+		return drugStr.toString().hashCode();
 	}
 }

@@ -64,7 +64,7 @@ class PerturbationTest {
 		assertEquals(perturbation.getDrugsVerbose(),"A B");
 		assertEquals(perturbation.getDrugs(), drugSet);
 		assertEquals(perturbation.getName(), "[A]-[B]");
-		assertEquals(perturbation.getPerturbationHash(), 4260);
+		assertEquals(perturbation.getPerturbationHash(), 1922447520);
 
 		// No predictions are added
 		perturbation.calculateStatistics();

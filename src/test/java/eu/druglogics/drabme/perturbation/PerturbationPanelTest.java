@@ -13,8 +13,7 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class PerturbationPanelTest {
@@ -77,7 +76,7 @@ class PerturbationPanelTest {
 	}
 
 	@Test
-	void test_panel_with_three_perturbations() {
+	void test_panel_with_three_perturbations() throws Exception {
 		// 1st perturbation: A drug alone
 		Drug[] perturbationA = new Drug[]{ drugA };
 
@@ -181,5 +180,36 @@ class PerturbationPanelTest {
 		assertEquals(PerturbationPanel.getCombinationName(new Drug[]{drugB, drugC}), "[B]-[C]");
 		assertEquals(PerturbationPanel.getCombinationName(new Drug[]{drugA, drugB, drugC}), "[A]-[B]-[C]");
 		assertEquals(PerturbationPanel.getCombinationName(new Drug[]{drugC, drugA, drugB}), "[C]-[A]-[B]");
+	}
+
+	@Test
+	void test_check_perturbation_hashes() throws Exception {
+		// 1st perturbation: A drug alone
+		Drug[] perturbationA = new Drug[]{ drugA };
+		Drug[] perturbationB = new Drug[]{ drugB };
+		Drug[] perturbationAB = new Drug[]{ drugA, drugB };
+		Drug[] perturbationBA = new Drug[]{ drugB, drugA };
+
+		// Panel with A twice is not valid
+		Drug[][] perturbations1 = new Drug[][]{perturbationA, perturbationA};
+		Exception exception1 = assertThrows(Exception.class, () -> new PerturbationPanel(perturbations1, mockLogger));
+		assertEquals(exception1.getMessage(), "Perturbations `[A]` and `[A]` have the same hash: -519354910");
+
+		// Panel with B twice is not valid
+		Drug[][] perturbations2 = new Drug[][]{perturbationB, perturbationB};
+		Exception exception2 = assertThrows(Exception.class, () -> new PerturbationPanel(perturbations2, mockLogger));
+		assertEquals(exception2.getMessage(), "Perturbations `[B]` and `[B]` have the same hash: 397702435");
+
+		// Panel with A+B twice (or B+A) is not valid
+		Drug[][] perturbations3 = new Drug[][]{perturbationAB, perturbationAB, perturbationA, perturbationB};
+		Drug[][] perturbations4 = new Drug[][]{perturbationBA, perturbationBA};
+		Exception exception3 = assertThrows(Exception.class, () -> new PerturbationPanel(perturbations3, mockLogger));
+		assertEquals(exception3.getMessage(), "Perturbations `[A]-[B]` and `[A]-[B]` have the same hash: 1781214465");
+		Exception exception4 = assertThrows(Exception.class, () -> new PerturbationPanel(perturbations4, mockLogger));
+		assertEquals(exception4.getMessage(), "Perturbations `[B]-[A]` and `[B]-[A]` have the same hash: -1809689761");
+
+		// Panel with A,B,A+B and B+A is valid
+		Drug[][] perturbations5 = new Drug[][]{perturbationA, perturbationB, perturbationAB, perturbationBA};
+		assertDoesNotThrow(() -> new PerturbationPanel(perturbations5, mockLogger));
 	}
 }

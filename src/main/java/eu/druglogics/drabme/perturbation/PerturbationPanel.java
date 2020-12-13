@@ -7,6 +7,7 @@ import eu.druglogics.gitsbe.util.Logger;
 
 import java.util.ArrayList;
 
+import static eu.druglogics.gitsbe.util.Util.abort;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -15,13 +16,15 @@ public class PerturbationPanel {
 	private Perturbation[] perturbations;
 	private Logger logger;
 
-	public PerturbationPanel(Drug[][] perturbations, Logger logger) {
+	public PerturbationPanel(Drug[][] perturbations, Logger logger) throws Exception {
 		this.logger = logger;
 		this.perturbations = new Perturbation[perturbations.length];
 
 		for (int i = 0; i < perturbations.length; i++) {
 			this.perturbations[i] = new Perturbation(perturbations[i], logger);
 		}
+
+		this.checkPerturbationHashes();
 
 		logger.outputLines(2, this.getCombinationNames(perturbations));
 	}
@@ -208,6 +211,27 @@ public class PerturbationPanel {
 		comboName.append("]");
 
 		return comboName.toString();
+	}
+
+	public void checkPerturbationHashes() throws Exception {
+		ArrayList<Integer> hashes = new ArrayList<>();
+		ArrayList<String> names = new ArrayList<>();
+		for (Perturbation perturbation: this.getPerturbations()) {
+			hashes.add(perturbation.getPerturbationHash());
+			names.add(perturbation.getName());
+		}
+
+		// search for same hashes in all perturbation pairs
+		for (int i = 0; i < hashes.size(); i++) {
+			int hash = hashes.get(i);
+			for (int j = i+1; j < hashes.size(); j++) {
+				if (hash == hashes.get(j)) {
+					String message = "Perturbations `" + names.get(i) + "` and `" + names.get(j) +
+						"` have the same hash: " + hash;
+					throw new Exception(message);
+				}
+			}
+		}
 	}
 
 }

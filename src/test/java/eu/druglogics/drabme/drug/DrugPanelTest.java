@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 import static org.assertj.core.util.Lists.newArrayList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -342,15 +341,15 @@ class DrugPanelTest {
 		doubleDrugSet[0].addTargets(new String[]{"AA1","AA2"});
 		doubleDrugSet[1] = new Drug("B", mockLogger);
 		doubleDrugSet[1].addTargets(new String[]{"BB1","BB2"});
-		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet), 260233);
+		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet), 1781214465);
 
-		// SET: {B,A} (order does not matter for the hash!)
+		// SET: {B,A} (order does matter for the hash!)
 		Drug[] doubleDrugSet2 = new Drug[2];
 		doubleDrugSet2[0] = new Drug("B", mockLogger);
 		doubleDrugSet2[0].addTargets(new String[]{"BB1","BB2"});
 		doubleDrugSet2[1] = new Drug("A", mockLogger);
 		doubleDrugSet2[1].addTargets(new String[]{"AA1","AA2"});
-		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet), 260233);
+		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet2), -1809689761);
 
 		// SET: {A,B,C,D}
 		Drug[] fourDrugSet = new Drug[4];
@@ -358,6 +357,55 @@ class DrugPanelTest {
 		fourDrugSet[1] = new Drug("B", mockLogger);
 		fourDrugSet[2] = new Drug("C", mockLogger);
 		fourDrugSet[3] = new Drug("D", mockLogger);
-		assertEquals(DrugPanel.getDrugSetHash(fourDrugSet), 266);
+		assertEquals(DrugPanel.getDrugSetHash(fourDrugSet), 2001986);
+
+		// more tests
+		Drug[] drug1 = new Drug[1];
+		drug1[0] = new Drug("CASP3i", mockLogger);
+		drug1[0].addTargets(new String[]{"CASP3"});
+		assertEquals(DrugPanel.getDrugSetHash(drug1), -941088793);
+
+		Drug[] drug2 = new Drug[1];
+		drug2[0] = new Drug("DUSP6i", mockLogger);
+		drug2[0].addTargets(new String[]{"DUSP6"});
+		assertEquals(DrugPanel.getDrugSetHash(drug2), 290687431);
+
+		Drug[] drug3 = new Drug[1];
+		drug3[0] = new Drug("CASP8i", mockLogger);
+		drug3[0].addTargets(new String[]{"CASP8"});
+		assertEquals(DrugPanel.getDrugSetHash(drug3), -798537679);
+
+		Drug[] drug4 = new Drug[1];
+		drug4[0] = new Drug("DUSP1i", mockLogger);
+		drug4[0].addTargets(new String[]{"DUSP1"});
+		assertEquals(DrugPanel.getDrugSetHash(drug4), 148136317);
+
+		// SET: {CASP8i,DUSP1i}
+		Drug[] doubleDrugSet3 = new Drug[2];
+		doubleDrugSet3[0] = new Drug("CASP8i", mockLogger);
+		doubleDrugSet3[0].addTargets(new String[]{"CASP8"});
+		doubleDrugSet3[1] = new Drug("DUSP1i", mockLogger);
+		doubleDrugSet3[1].addTargets(new String[]{"DUSP1"});
+		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet3), 831570092);
+
+		// SET: {CASP3i,DUSP6i}
+		Drug[] doubleDrugSet4 = new Drug[2];
+		doubleDrugSet4[0] = new Drug("CASP3i", mockLogger);
+		doubleDrugSet4[0].addTargets(new String[]{"CASP3"});
+		doubleDrugSet4[1] = new Drug("DUSP6i", mockLogger);
+		doubleDrugSet4[1].addTargets(new String[]{"DUSP6"});
+		assertEquals(DrugPanel.getDrugSetHash(doubleDrugSet4), 1019102080);
+
+		// Test uniqueness of hashes (this used to fail)
+		assertNotEquals(DrugPanel.getDrugSetHash(doubleDrugSet3), DrugPanel.getDrugSetHash(doubleDrugSet4));
+
+		/*
+		// This is a limitation of the hash function (can't do anything about it)
+		Drug[] singleDrugSet2 = new Drug[1];
+		singleDrugSet2[0] = new Drug("FB", mockLogger);
+		Drug[] singleDrugSet3 = new Drug[1];
+		singleDrugSet3[0] = new Drug("Ea", mockLogger);
+		assertEquals(DrugPanel.getDrugSetHash(singleDrugSet2), DrugPanel.getDrugSetHash(singleDrugSet3));
+		*/
 	}
 }
