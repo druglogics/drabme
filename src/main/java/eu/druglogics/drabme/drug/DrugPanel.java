@@ -3,7 +3,7 @@ package eu.druglogics.drabme.drug;
 import eu.druglogics.drabme.perturbation.PerturbationPanel;
 import eu.druglogics.gitsbe.model.BooleanModel;
 import eu.druglogics.gitsbe.util.Logger;
-import org.paukov.combinatorics.Factory;
+import org.paukov.combinatorics.CombinatoricsFactory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
@@ -251,11 +251,11 @@ public class DrugPanel {
 			// Next add each drug combination to perturbation set
 			// --------------------------------------------------
 
-			ICombinatoricsVector<Drug> initialVector = Factory.createVector(drugs.toArray(new Drug[0]));
+			ICombinatoricsVector<Drug> initialVector = CombinatoricsFactory.createVector(drugs.toArray(new Drug[0]));
 
 			// Create a simple combination generator to generate n-combinations
 			// of the initial vector
-			Generator<Drug> gen = Factory.createSimpleCombinationGenerator(initialVector, k);
+			Generator<Drug> gen = CombinatoricsFactory.createSimpleCombinationGenerator(initialVector, k);
 
 			ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<>();
 
@@ -292,11 +292,11 @@ public class DrugPanel {
 		int drugsInCombination = combination.length;
 		int drugsInSubset = drugsInCombination - 1;
 
-		ICombinatoricsVector<Drug> initialVector = Factory.createVector(combination);
+		ICombinatoricsVector<Drug> initialVector = CombinatoricsFactory.createVector(combination);
 
 		// Create a simple combination generator to generate n-combinations of
 		// the initial vector
-		Generator<Drug> gen = Factory.createSimpleCombinationGenerator(initialVector, drugsInSubset);
+		Generator<Drug> gen = CombinatoricsFactory.createSimpleCombinationGenerator(initialVector, drugsInSubset);
 
 		ArrayList<ICombinatoricsVector<Drug>> drugs = new ArrayList<>();
 
