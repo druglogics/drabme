@@ -15,7 +15,6 @@ For a full documentation of this package check [here](https://druglogics.github.
 First, install [gitsbe](https://github.com/druglogics/gitsbe).
 Then:
 ```
-# tested with maven 3.6.0
 git clone https://github.com/druglogics/drabme.git
 cd drabme
 mvn clean install
