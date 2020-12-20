@@ -27,5 +27,13 @@ jobs:
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
+    - name: Install Gitsbe from GitHub
+      run: |
+        gitsbe_version=$(cat pom.xml | grep -oPm1 "(?<=<gitsbe.version>)[^<]+")
+        echo $gitsbe_version
+        git clone https://github.com/druglogics/gitsbe.git
+        cd gitsbe
+        git checkout v$gitsbe_version
+        mvn clean install
     - name: Build and Test with Maven
       run: mvn -B package --file pom.xml
