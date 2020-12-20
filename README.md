@@ -17,6 +17,7 @@ Then:
 ```
 # tested with maven 3.6.0
 git clone https://github.com/druglogics/drabme.git
+cd drabme
 mvn clean install
 ```
 
