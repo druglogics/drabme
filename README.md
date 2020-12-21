@@ -20,6 +20,10 @@ cd drabme
 mvn clean install
 ```
 
+The above command creates a package `<name>-jar-with-dependencies.jar` file with all dependencies installed, in the `target` directory.
+
+Alternatively, you could just use directly one of the [released packages](https://github.com/druglogics/drabme/packages/).
+
 ## Run example
 
 The recommended way to run Drabme is to use it’s `Launcher`. 
